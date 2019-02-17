@@ -9,18 +9,18 @@
  * documentation for any purpose, without fee, and without written agreement is
  * hereby granted, provided that the above copyright notice and the following
  * two paragraphs appear in all copies of this software.
- * 
- * IN NO EVENT SHALL THE AUTHOR OR THE UNIVERSITY OF ILLINOIS BE LIABLE TO 
- * ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL 
- * DAMAGES ARISING OUT  OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, 
- * EVEN IF THE AUTHOR AND/OR THE UNIVERSITY OF ILLINOIS HAS BEEN ADVISED 
+ *
+ * IN NO EVENT SHALL THE AUTHOR OR THE UNIVERSITY OF ILLINOIS BE LIABLE TO
+ * ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+ * DAMAGES ARISING OUT  OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+ * EVEN IF THE AUTHOR AND/OR THE UNIVERSITY OF ILLINOIS HAS BEEN ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
- * THE AUTHOR AND THE UNIVERSITY OF ILLINOIS SPECIFICALLY DISCLAIM ANY 
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE 
+ *
+ * THE AUTHOR AND THE UNIVERSITY OF ILLINOIS SPECIFICALLY DISCLAIM ANY
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE
  * PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND NEITHER THE AUTHOR NOR
- * THE UNIVERSITY OF ILLINOIS HAS ANY OBLIGATION TO PROVIDE MAINTENANCE, 
+ * THE UNIVERSITY OF ILLINOIS HAS ANY OBLIGATION TO PROVIDE MAINTENANCE,
  * SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
  *
  * Author:        Steve Lumetta
@@ -86,7 +86,7 @@ typedef struct {
     int time_to_first_fruit;     /* 300 to 120, in steps of -30      */
     int time_between_fruits;     /* 300 to 60, in steps of -30       */
     int tick_usec;         /* 20000 to 5000, in steps of -1750 */
-    
+
     /* dynamic values within a level -- you may want to add more... */
     unsigned int map_x, map_y;   /* current upper left display pixel */
 } game_info_t;
@@ -103,7 +103,7 @@ static int unveil_around_player(int play_x, int play_y);
 static void *rtc_thread(void *arg);
 static void *keyboard_thread(void *arg);
 
-/* 
+/*
  * prepare_maze_level
  *   DESCRIPTION: Prepare for a maze of a given level.  Fills the game_info
  *          structure, creates a maze, and initializes the display.
@@ -115,7 +115,7 @@ static void *keyboard_thread(void *arg);
  */
 static int prepare_maze_level(int level) {
     int i; /* loop index for drawing display */
-    
+
     /*
      * Record level in game_info; other calculations use offset from
      * level 1.
@@ -142,17 +142,17 @@ static int prepare_maze_level(int level) {
     /* Create a maze. */
     if (make_maze(game_info.maze_x_dim, game_info.maze_y_dim, game_info.initial_fruit_count) != 0)
         return -1;
-    
+
     /* Set logical view and draw initial screen. */
     set_view_window(game_info.map_x, game_info.map_y);
     for (i = 0; i < SCROLL_Y_DIM; i++)
-        (void)draw_horiz_line (i);
+        (void)draw_+ (i);
 
     /* Return success. */
     return 0;
 }
 
-/* 
+/*
  * move_up
  *   DESCRIPTION: Move the player up one pixel (assumed to be a legal move)
  *   INPUTS: ypos -- pointer to player's y position (pixel) in the maze
@@ -176,7 +176,7 @@ static void move_up(int* ypos) {
     }
 }
 
-/* 
+/*
  * move_right
  *   DESCRIPTION: Move the player right one pixel (assumed to be a legal move)
  *   INPUTS: xpos -- pointer to player's x position (pixel) in the maze
@@ -201,7 +201,7 @@ static void move_right(int* xpos) {
     }
 }
 
-/* 
+/*
  * move_down
  *   DESCRIPTION: Move the player right one pixel (assumed to be a legal move)
  *   INPUTS: ypos -- pointer to player's y position (pixel) in the maze
@@ -215,7 +215,7 @@ static void move_down(int* ypos) {
      * Panning is necessary when the player moves past the right pan border
      * while the bottom pixels of the maze are not on-screen.
      */
-    if (++(*ypos) > game_info.map_y + SCROLL_Y_DIM - BLOCK_Y_DIM * (PAN_BORDER + 1) && 
+    if (++(*ypos) > game_info.map_y + SCROLL_Y_DIM - BLOCK_Y_DIM * (PAN_BORDER + 1) &&
         game_info.map_y + SCROLL_Y_DIM < (2 * game_info.maze_y_dim + 1) * BLOCK_Y_DIM - SHOW_MIN) {
         /*
          * Shift the logical view downwards by one pixel and draw the
@@ -226,7 +226,7 @@ static void move_down(int* ypos) {
     }
 }
 
-/* 
+/*
  * move_left
  *   DESCRIPTION: Move the player right one pixel (assumed to be a legal move)
  *   INPUTS: xpos -- pointer to player's x position (pixel) in the maze
@@ -250,7 +250,7 @@ static void move_left(int* xpos) {
     }
 }
 
-/* 
+/*
  * unveil_around_player
  *   DESCRIPTION: Show the maze squares in an area around the player.
  *                Consume any fruit under the player.  Check whether
@@ -285,8 +285,8 @@ static int unveil_around_player(int play_x, int play_y) {
 }
 
 #ifndef NDEBUG
-/* 
- * sanity_check 
+/*
+ * sanity_check
  *   DESCRIPTION: Perform checks on changes to constants and enumerated values.
  *   INPUTS: none
  *   OUTPUTS: none
@@ -294,7 +294,7 @@ static int unveil_around_player(int play_x, int play_y) {
  *   SIDE EFFECTS: none
  */
 static int sanity_check() {
-    /* 
+    /*
      * Automatically detect when fruits have been added in blocks.h
      * without allocating enough bits to identify all types of fruit
      * uniquely (along with 0, which means no fruit).
@@ -330,16 +330,16 @@ static void *keyboard_thread(void *arg) {
     char key;
     int state = 0;
     // Break only on win or quit input - '`'
-    while (winner == 0) {        
+    while (winner == 0) {
         // Get Keyboard Input
         key = getc(stdin);
-        
+
         // Check for '`' to quit
         if (key == BACKQUOTE) {
             quit_flag = 1;
             break;
         }
-        
+
         // Compare and Set next_dir
         // Arrow keys deliver 27, 91, ##
         if (key == 27) {
@@ -348,7 +348,7 @@ static void *keyboard_thread(void *arg) {
         else if (key == 91 && state == 1) {
             state = 2;
         }
-        else {    
+        else {
             if (key >= UP && key <= LEFT && state == 2) {
                 pthread_mutex_lock(&mtx);
                 switch(key) {
@@ -429,11 +429,11 @@ static void *rtc_thread(void *arg) {
         while ((quit_flag == 0) && (goto_next_level == 0)) {
             // Wait for Periodic Interrupt
             ret = read(fd, &data, sizeof(unsigned long));
-        
+
             // Update tick to keep track of time.  If we missed some
             // interrupts we want to update the player multiple times so
             // that player velocity is smooth
-            ticks = data >> 8;    
+            ticks = data >> 8;
 
             total += ticks;
 
@@ -477,15 +477,15 @@ static void *rtc_thread(void *arg) {
                         goto_next_level = 1;
                         break;
                     }
-                
+
                     // Record directions open to motion.
                     find_open_directions (play_x / BLOCK_X_DIM, play_y / BLOCK_Y_DIM, open);
-        
-                    // Change dir to next_dir if next_dir is open 
+
+                    // Change dir to next_dir if next_dir is open
                     if (open[next_dir]) {
                         dir = next_dir;
                     }
-    
+
                     // The direction may not be open to motion...
                     //   1) ran into a wall
                     //   2) initial direction and its opposite both face walls
@@ -493,7 +493,7 @@ static void *rtc_thread(void *arg) {
                         if (!open[dir]) {
                             dir = DIR_STOP;
                         }
-                        else if (dir == DIR_UP || dir == DIR_DOWN) {    
+                        else if (dir == DIR_UP || dir == DIR_DOWN) {
                             move_cnt = BLOCK_Y_DIM;
                         }
                         else {
@@ -503,37 +503,37 @@ static void *rtc_thread(void *arg) {
                 }
                 // Unlock the mutex
                 pthread_mutex_unlock(&mtx);
-        
+
                 if (dir != DIR_STOP) {
                     // move in chosen direction
                     last_dir = dir;
-                    move_cnt--;    
+                    move_cnt--;
                     switch (dir) {
-                        case DIR_UP:    
-                            move_up(&play_y);    
+                        case DIR_UP:
+                            move_up(&play_y);
                             break;
-                        case DIR_RIGHT: 
-                            move_right(&play_x); 
+                        case DIR_RIGHT:
+                            move_right(&play_x);
                             break;
-                        case DIR_DOWN:  
-                            move_down(&play_y);  
+                        case DIR_DOWN:
+                            move_down(&play_y);
                             break;
-                        case DIR_LEFT:  
-                            move_left(&play_x);  
+                        case DIR_LEFT:
+                            move_left(&play_x);
                             break;
                     }
-                    draw_full_block(play_x, play_y, get_player_block(last_dir));    
+                    draw_full_block(play_x, play_y, get_player_block(last_dir));
                     need_redraw = 1;
                 }
             }
             if (need_redraw)
-                show_screen();    
+                show_screen();
             need_redraw = 0;
-        }    
+        }
     }
     if (quit_flag == 0)
         winner = 1;
-    
+
     return 0;
 }
 
@@ -555,10 +555,10 @@ int main() {
 
     // Initialize RTC
     fd = open("/dev/rtc", O_RDONLY, 0);
-    
+
     // Enable RTC periodic interrupts at update_rate Hz
     // Default max is 64...must change in /proc/sys/dev/rtc/max-user-freq
-    ret = ioctl(fd, RTC_IRQP_SET, update_rate);    
+    ret = ioctl(fd, RTC_IRQP_SET, update_rate);
     ret = ioctl(fd, RTC_PIE_ON, 0);
 
     // Initialize Keyboard
@@ -567,13 +567,13 @@ int main() {
         perror("fcntl to make stdin non-blocking");
         return -1;
     }
-    
+
     // Save current terminal attributes for stdin.
     if (tcgetattr(fileno(stdin), &tio_orig) != 0) {
         perror("tcgetattr to read stdin terminal settings");
         return -1;
     }
-    
+
     // Turn off canonical (line-buffered) mode and echoing of keystrokes
     // Set minimal character and timing parameters so as
     tio_new = tio_orig;
@@ -593,22 +593,22 @@ int main() {
     // Create the threads
     pthread_create(&tid1, NULL, rtc_thread, NULL);
     pthread_create(&tid2, NULL, keyboard_thread, NULL);
-    
+
     // Wait for all the threads to end
     pthread_join(tid1, NULL);
     pthread_join(tid2, NULL);
 
     // Shutdown Display
     clear_mode_X();
-    
+
     // Close Keyboard
     (void)tcsetattr(fileno(stdin), TCSANOW, &tio_orig);
-        
+
     // Close RTC
     close(fd);
 
     // Print outcome of the game
-    if (winner == 1) {    
+    if (winner == 1) {
         printf("You win the game! CONGRATULATIONS!\n");
     }
     else if (quit_flag == 1) {

@@ -623,6 +623,38 @@ void draw_full_block(int pos_x, int pos_y, unsigned char* blk) {
  */
 int draw_vert_line(int x) {
     /* to be written... */
+    unsigned char buf[SCROLL_Y_DIM];    /* buffer for graphical image of line */
+    unsigned char* addr;                /* address of first pixel in build    */
+                                        /*     buffer (without plane offset)  */
+    int p_off;                          /* offset of plane of first pixel     */
+    int i;                              /* loop index over pixels             */
+
+    /* Check whether requested line falls in the logical view window. */
+    if (x < 0 || x >= SCROLL_X_DIM)
+        return -1;
+
+    /* Adjust y to the logical row value. */
+    x += show_x;
+
+    /* Get the image of the line. and put into buffer */
+    (*vert_line_fn) (x, show_y, buf);
+
+    /* Calculate starting address in build buffer. */
+    addr = img3 + (show_y >> 2) + x * SCROLL_Y_DIM;
+
+    /* Calculate plane offset of first pixel.
+    Offset from tradition 01234 in (0,0) of logic window*/
+    p_off = (3 - (show_y & 3));
+
+    /* Copy image data into appropriate planes in build buffer. */
+    for (i = 0; i < SCROLL_Y_DIM; i++) {
+        addr[p_off * SCROLL_SIZE] = buf[i];//ASK TA ABOUT SCROLL_SIZE
+        /*if (--p_off < 0) {
+            p_off = 3;
+            addr++;
+        }*/
+        addr+=SCROLL_X_WIDTH;
+    }
     return 0;
 }
 
@@ -653,18 +685,19 @@ int draw_horiz_line(int y) {
     /* Adjust y to the logical row value. */
     y += show_y;
 
-    /* Get the image of the line. */
+    /* Get the image of the line. and put into buffer */
     (*horiz_line_fn) (show_x, y, buf);
 
     /* Calculate starting address in build buffer. */
     addr = img3 + (show_x >> 2) + y * SCROLL_X_WIDTH;
 
-    /* Calculate plane offset of first pixel. */
+    /* Calculate plane offset of first pixel.
+    Offset from tradition 01234 in (0,0) of logic window*/
     p_off = (3 - (show_x & 3));
 
     /* Copy image data into appropriate planes in build buffer. */
     for (i = 0; i < SCROLL_X_DIM; i++) {
-        addr[p_off * SCROLL_SIZE] = buf[i];
+        addr[p_off * SCROLL_SIZE] = buf[i];//ask TA
         if (--p_off < 0) {
             p_off = 3;
             addr++;
