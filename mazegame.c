@@ -146,7 +146,7 @@ static int prepare_maze_level(int level) {
     /* Set logical view and draw initial screen. */
     set_view_window(game_info.map_x, game_info.map_y);
     for (i = 0; i < SCROLL_Y_DIM; i++)
-        (void)draw_+ (i);
+        (void)draw_horiz_line (i);
 
     /* Return success. */
     return 0;

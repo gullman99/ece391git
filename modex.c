@@ -640,11 +640,12 @@ int draw_vert_line(int x) {
     (*vert_line_fn) (x, show_y, buf);
 
     /* Calculate starting address in build buffer. */
-    addr = img3 + (show_y >> 2) + x * SCROLL_Y_DIM;
+    addr = img3 + (x>>2) + show_y * SCROLL_X_WIDTH;
 
     /* Calculate plane offset of first pixel.
     Offset from tradition 01234 in (0,0) of logic window*/
-    p_off = (3 - (show_y & 3));
+    //use x because that is the location of drawn line
+    p_off = (3 - (x & 3));
 
     /* Copy image data into appropriate planes in build buffer. */
     for (i = 0; i < SCROLL_Y_DIM; i++) {
