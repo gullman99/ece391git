@@ -11,18 +11,8 @@
  * two paragraphs appear in all copies of this software.
  *
  * IN NO EVENT SHALL THE AUTHOR OR THE UNIVERSITY OF ILLINOIS BE LIABLE TO
- * ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
- * DAMAGES ARISING OUT  OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
- * EVEN IF THE AUTHOR AND/OR THE UNIVERSITY OF ILLINOIS HAS BEEN ADVISED
- * OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * THE AUTHOR AND THE UNIVERSITY OF ILLINOIS SPECIFICALLY DISCLAIM ANY
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE
- * PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND NEITHER THE AUTHOR NOR
- * THE UNIVERSITY OF ILLINOIS HAS ANY OBLIGATION TO PROVIDE MAINTENANCE,
- * SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
- *
+
+
  * Author:        Steve Lumetta
  * Version:       3
  * Creation Date: Fri Sep 10 09:59:17 2004
@@ -70,6 +60,8 @@
 #define SCREEN_SIZE             (SCROLL_SIZE * 4 + 1)
 #define BUILD_BUF_SIZE          (SCREEN_SIZE + 20000)
 #define BUILD_BASE_INIT         ((BUILD_BUF_SIZE - SCREEN_SIZE) / 2)
+//#define STATUS_BAR_LOCATION 200-18
+
 
 /* Mode X and general VGA parameters */
 #define VID_MEM_SIZE            131072
@@ -79,24 +71,55 @@
 #define NUM_GRAPHICS_REGS       9
 #define NUM_ATTR_REGS           22
 
+//constants for status bar
+#define STATUS_BAR_HEIGHT		18
+#define STATUS_BUILD_SIZE  		(STATUS_BAR_HEIGHT*SCROLL_X_WIDTH)
+
+
 /* VGA register settings for mode X */
 static unsigned short mode_X_seq[NUM_SEQUENCER_REGS] = {
     0x0100, 0x2101, 0x0F02, 0x0003, 0x0604
 };
+/*static unsigned short mode_X_CRTC[NUM_CRTC_REGS] = {
+    0x5F00, 0x4F01, 0x5002, 0x8203, 0x5404, 0x8005, 0xBF06, 0x1F07(bit4 already 1),
+    0x0008, (0x4109)change bit 6 to 0, 0x000A, 0x000B, 0x000C, 0x000D, 0x000E, 0x000F,
+    0x9C10, 0x8E11, 0x8F12, 0x2813, 0x0014, 0x9615, 0xB916, 0xE317,
+    (0xFF18)changed
+};*/
+
+//change LCR to 364 =x16C FOR STATUS BAR   
+
 static unsigned short mode_X_CRTC[NUM_CRTC_REGS] = {
     0x5F00, 0x4F01, 0x5002, 0x8203, 0x5404, 0x8005, 0xBF06, 0x1F07,
-    0x0008, 0x4109, 0x000A, 0x000B, 0x000C, 0x000D, 0x000E, 0x000F,
+    0x0008, 0x0109, 0x000A, 0x000B, 0x000C, 0x000D, 0x000E, 0x000F,
     0x9C10, 0x8E11, 0x8F12, 0x2813, 0x0014, 0x9615, 0xB916, 0xE317,
-    0xFF18
+    0x6C18
 };
+
+/*
+static unsigned char mode_X_attr[NUM_ATTR_REGS * 2] = {
+    0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03,
+    0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x07,
+    (0x08)changed, 0x08, 0x09, 0x09, 0x0A, 0x0A, 0x0B, 0x0B,
+    0x0C, 0x0C, 0x0D, 0x0D, 0x0E, 0x0E, 0x0F, 0x0F,
+    0x10, 0x41, 0x11, 0x00, 0x12, 0x0F, 0x13, 0x00,
+    0x14, 0x00, 0x15, 0x00
+};*/
+
+//change Attribute control register bit for PPM to 1 FOR STATUS BAR
+//16th element previously (0x08)
+//previous value x08 5th bit change to x0A (little endian)
 static unsigned char mode_X_attr[NUM_ATTR_REGS * 2] = {
     0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03,
     0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x07,
     0x08, 0x08, 0x09, 0x09, 0x0A, 0x0A, 0x0B, 0x0B,
     0x0C, 0x0C, 0x0D, 0x0D, 0x0E, 0x0E, 0x0F, 0x0F,
-    0x10, 0x41, 0x11, 0x00, 0x12, 0x0F, 0x13, 0x00,
+    0x11, 0x41, 0x11, 0x00, 0x12, 0x0F, 0x13, 0x00,
     0x14, 0x00, 0x15, 0x00
 };
+
+//
+
 static unsigned short mode_X_graphics[NUM_GRAPHICS_REGS] = {
     0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x4005, 0x0506, 0x0F07,
     0xFF08
@@ -166,11 +189,12 @@ static void copy_image(unsigned char* img, unsigned short scr_addr);
 #ifndef NDEBUG
 #define MEM_FENCE_WIDTH 256
 #else
-#define MEM_FENCE_WIDTH 0
+#define MEM_FENCE_WIDTH 18
 #endif
 #define MEM_FENCE_MAGIC 0xF3
 
 static unsigned char build[BUILD_BUF_SIZE + 2 * MEM_FENCE_WIDTH];
+static unsigned char status_build[STATUS_BUILD_SIZE];
 static int img3_off;                /* offset of upper left pixel   */
 static unsigned char* img3;         /* pointer to upper left pixel  */
 static int show_x, show_y;          /* logical view coordinates     */
@@ -298,9 +322,10 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
         build[i] = MEM_FENCE_MAGIC;
         build[BUILD_BUF_SIZE + MEM_FENCE_WIDTH + i] = MEM_FENCE_MAGIC;
     }
-
+	
+	
     /* One display page goes at the start of video memory. */
-    target_img = 0x0000;
+    target_img = STATUS_BUILD_SIZE;
 
     /* Map video memory and obtain permission for VGA port access. */
     if (open_memory_and_ports() == -1)
@@ -318,6 +343,8 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
      *   CRTC Mode Control Register    : 0xA3 to 0xE3 (0x3D4/0x17)
      */
 
+
+	//draw_status_bar
     VGA_blank(1);                               /* blank the screen      */
     set_seq_regs_and_reset(mode_X_seq, 0x63);   /* sequencer registers   */
     set_CRTC_registers(mode_X_CRTC);            /* CRT control registers */
@@ -330,6 +357,28 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
     /* Return success. */
     return 0;
 }
+/*
+ * draw_status_bar
+ *   DESCRIPTION: create build buffer and change 
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: TBD
+ */
+/*
+void draw_status_bar(){
+	//text information
+	for (i = 0; i < STATUS_BUILD_SIZE; i++) {
+		status_build[i]=//blackPixel or text information
+	}
+	
+	
+	
+	
+}
+
+*/
+
 
 /*
  * clear_mode_X
@@ -486,6 +535,11 @@ void set_view_window(int scr_x, int scr_y) {
  *   SIDE EFFECTS: copies from the build buffer to video memory;
  *                 shifts the VGA display source to point to the new image
  */
+ //looping though and copying each plane to vga memory
+ //in status_bar(){
+		//write a similar show_screen() modify some parameters
+		
+ 
 void show_screen() {
     unsigned char* addr;    /* source address for copy             */
     int p_off;              /* plane offset of first display plane */
