@@ -56,7 +56,7 @@
 #define STATUS_BUILD_SIZE  		 (STATUS_BAR_HEIGHT*SCROLL_X_WIDTH)
 #define IMAGE_X_DIM     320   /* pixels; must be divisible by 4             */
 #define IMAGE_Y_DIM     200   /* pixels                                     */
-#define IMAGE_X_WIDTH   (IMAGE_X_DIM / 4)          /* addresses (bytes)*/ 
+#define IMAGE_X_WIDTH   (IMAGE_X_DIM / 4)          /* addresses (bytes)*/
 
 
 void text_to_graphics(char * text, unsigned char * status_buffer){
@@ -65,19 +65,33 @@ void text_to_graphics(char * text, unsigned char * status_buffer){
   //planes
 
   //TEXT_WIDTH? OR TEXT_WIDTH_DIM
+  unsigned char char_data;
   unsigned char temp_buffer[STATUS_BAR_TEXT_SIZE*STATUS_BAR_HEIGHT*TEXT_WIDTH];
-
+  unsigned char convert_to_bitmask[STATUS_BAR_TEXT_SIZE*STATUS_BAR_HEIGHT*TEXT_WIDTH];
 
   int stringSize= strlen(text);
   if(stringSize==40){
     int i,j,k;
     for(i=0;i<stringSize;i++){
       //status_buffer
+      for(k=0;k<TEXT_HEIGHT;k++){
+        for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
+          char_data=font_data[text[i]][k];
+          if(char_data>>j&0x01){
+            convert_to_bitmask[j+k*TEXT_WIDTH+]=5;
+          }
+          else{
+            conver_to_bitmask[j*k]=1;
+          }
+        }
+      }
+    }
+    for(i=0;i<stringSize;i++){
+      //status_buffer
       for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
         for(k=0;k<TEXT_HEIGHT;k++){
-          temp_buffer[(j%4)*(STATUS_BUILD_SIZE/4)+j/4+k*TEXT_HEIGHT*TEXT_WIDTH+j*TEXT_HEIGHT+k]=text[i];
-
-
+          if()
+          temp_buffer[(j%4)*(STATUS_BUILD_SIZE/4)+j/4+k*Image_X_Width+2*i]=
         }
       }
     }
