@@ -57,9 +57,11 @@
  * middle of the available buffer area.
  */
 #define SCROLL_SIZE             (SCROLL_X_WIDTH * SCROLL_Y_DIM)
+#define NEW_SCROLL_SIZE         (SCROLL_X_WIDTH * SCROLL_Y_DIM-18)
 #define SCREEN_SIZE             (SCROLL_SIZE * 4 + 1)
-#define BUILD_BUF_SIZE          (SCREEN_SIZE + 20000)
-#define BUILD_BASE_INIT         ((BUILD_BUF_SIZE - SCREEN_SIZE) / 2)
+#define NEW_SCREEN_SIZE         (NEW_SCROLL_SIZE * 4 + 1)
+#define BUILD_BUF_SIZE          (NEW_SCREEN_SIZE + 20000)
+#define BUILD_BASE_INIT         ((BUILD_BUF_SIZE - NEW_SCREEN_SIZE) / 2)
 //#define STATUS_BAR_LOCATION 200-18
 
 
@@ -72,8 +74,9 @@
 #define NUM_ATTR_REGS           22
 
 //constants for status bar
-#define STATUS_BAR_HEIGHT		18
-#define STATUS_BUILD_SIZE  		(STATUS_BAR_HEIGHT*SCROLL_X_WIDTH)
+#define STATUS_BAR_HEIGHT		    18
+#define STATUS_BUILD_SIZE  		 (STATUS_BAR_HEIGHT*SCROLL_X_WIDTH)
+#define NEW_MEMORY_SIZE         1600-STATUS_BUILD_SIZE
 
 
 /* VGA register settings for mode X */
@@ -87,7 +90,7 @@ static unsigned short mode_X_seq[NUM_SEQUENCER_REGS] = {
     (0xFF18)changed
 };*/
 
-//change LCR to 364 =x16C FOR STATUS BAR   
+//change LCR to 364 =x16C FOR STATUS BAR
 
 static unsigned short mode_X_CRTC[NUM_CRTC_REGS] = {
     0x5F00, 0x4F01, 0x5002, 0x8203, 0x5404, 0x8005, 0xBF06, 0x1F07,
@@ -322,8 +325,8 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
         build[i] = MEM_FENCE_MAGIC;
         build[BUILD_BUF_SIZE + MEM_FENCE_WIDTH + i] = MEM_FENCE_MAGIC;
     }
-	
-	
+
+
     /* One display page goes at the start of video memory. */
     target_img = STATUS_BUILD_SIZE;
 
@@ -359,7 +362,7 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
 }
 /*
  * draw_status_bar
- *   DESCRIPTION: create build buffer and change 
+ *   DESCRIPTION: create build buffer and change
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -368,16 +371,17 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
 /*
 void draw_status_bar(){
 	//text information
+  int i;
 	for (i = 0; i < STATUS_BUILD_SIZE; i++) {
-		status_build[i]=//blackPixel or text information
+		status_build[i]=0;
 	}
-	
-	
-	
-	
-}
 
+
+
+
+}
 */
+
 
 
 /*
@@ -538,8 +542,8 @@ void set_view_window(int scr_x, int scr_y) {
  //looping though and copying each plane to vga memory
  //in status_bar(){
 		//write a similar show_screen() modify some parameters
-		
- 
+
+
 void show_screen() {
     unsigned char* addr;    /* source address for copy             */
     int p_off;              /* plane offset of first display plane */
@@ -1049,9 +1053,12 @@ static void copy_image(unsigned char* img, unsigned short scr_addr) {
      * implemented using ISA-specific features like those below,
      * but the code here provides an example of x86 string moves
      */
+
+    //new memory size is SCROLL_SIZE- STATUS_BUILD_SIZE=14560
+    //new memory=16000-1440=14560
     asm volatile ("                                             \n\
         cld                                                     \n\
-        movl $16000,%%ecx                                       \n\
+        movl $14560,%%ecx                                       \n\
         rep movsb    /* copy ECX bytes from M[ESI] to M[EDI] */ \n\
         "
         : /* no outputs */

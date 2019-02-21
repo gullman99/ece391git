@@ -48,6 +48,25 @@
  * Each byte represents a single bitmapped line of a single character.
  */
 
+#define STATUS_BAR_TEXT_SIZE    40
+
+
+
+
+void text_to_graphics(char * text, unsigned char * status_buffer){
+  //////TEXT to graphics
+  //pad zeros on each side
+  //planes
+
+
+  int stringSize= strlen(text);
+  if(stringSize==40){
+    int i;
+    for(i=0;i<stringSize;i++){
+      //status_buffer
+    }
+  }
+}
 
 
 
