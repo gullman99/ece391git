@@ -49,8 +49,14 @@
  */
 
 #define STATUS_BAR_TEXT_SIZE    40
-
-
+#define STATUS_BAR_HEIGHT		    18
+#define TEXT_WIDTH              8
+#define TEXT_WIDTH_DIM          8/4
+#define TEXT_HEIGHT             16
+#define STATUS_BUILD_SIZE  		 (STATUS_BAR_HEIGHT*SCROLL_X_WIDTH)
+#define IMAGE_X_DIM     320   /* pixels; must be divisible by 4             */
+#define IMAGE_Y_DIM     200   /* pixels                                     */
+#define IMAGE_X_WIDTH   (IMAGE_X_DIM / 4)          /* addresses (bytes)*/ 
 
 
 void text_to_graphics(char * text, unsigned char * status_buffer){
@@ -58,12 +64,22 @@ void text_to_graphics(char * text, unsigned char * status_buffer){
   //pad zeros on each side
   //planes
 
+  //TEXT_WIDTH? OR TEXT_WIDTH_DIM
+  unsigned char temp_buffer[STATUS_BAR_TEXT_SIZE*STATUS_BAR_HEIGHT*TEXT_WIDTH];
+
 
   int stringSize= strlen(text);
   if(stringSize==40){
-    int i;
+    int i,j,k;
     for(i=0;i<stringSize;i++){
       //status_buffer
+      for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
+        for(k=0;k<TEXT_HEIGHT;k++){
+          temp_buffer[(j%4)*(STATUS_BUILD_SIZE/4)+j/4+k*TEXT_HEIGHT*TEXT_WIDTH+j*TEXT_HEIGHT+k]=text[i];
+
+
+        }
+      }
     }
   }
 }
