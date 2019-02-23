@@ -70,33 +70,31 @@ void text_to_graphics(char * text, unsigned char * status_buffer){
   unsigned char convert_to_bitmask[STATUS_BAR_TEXT_SIZE*STATUS_BAR_HEIGHT*TEXT_WIDTH];
 
   int stringSize= strlen(text);
-  if(stringSize==40){
-    int i,j,k;
-    for(i=0;i<stringSize;i++){
-      //status_buffer
-      for(k=0;k<TEXT_HEIGHT;k++){
-        for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
-          char_data=font_data[text[i]][k];
-          if(char_data>>j&0x01){
-            convert_to_bitmask[j+k*TEXT_WIDTH+]=5;
-          }
-          else{
-            conver_to_bitmask[j*k]=1;
-          }
-        }
-      }
-    }
-    for(i=0;i<stringSize;i++){
-      //status_buffer
+  int i,j,k;
+  for(i=0;i<stringSize;i++){
+    //status_buffer
+    for(k=0;k<TEXT_HEIGHT;k++){
       for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
-        for(k=0;k<TEXT_HEIGHT;k++){
-          if()
-          temp_buffer[(j%4)*(STATUS_BUILD_SIZE/4)+j/4+k*Image_X_Width+2*i]=
+        char_data=font_data[text[i]][k];
+        if(char_data>>j&0x01){
+          convert_to_bitmask[j+k*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT]=5;
+        }
+        else{
+          convert_to_bitmask[j+k*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT]=1;
         }
       }
     }
   }
+  for(i=0;i<stringSize;i++){
+    //status_buffer
+    for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
+      for(k=0;k<TEXT_HEIGHT;k++){
+        status_buffer[(j%4)*(STATUS_BUILD_SIZE/4)+j/4+k*Image_X_Width+2*i] = convert_to_bitmask[j+k*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
+      }
+    }
+  }
 }
+
 
 
 

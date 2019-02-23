@@ -346,8 +346,10 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
      *   CRTC Mode Control Register    : 0xA3 to 0xE3 (0x3D4/0x17)
      */
 
+    char status_bar_text[40] = "This is my status bar bitch";
 
-	//draw_status_bar
+
+	  draw_status_bar(status_bar_text, status_build);
     VGA_blank(1);                               /* blank the screen      */
     set_seq_regs_and_reset(mode_X_seq, 0x63);   /* sequencer registers   */
     set_CRTC_registers(mode_X_CRTC);            /* CRT control registers */
@@ -360,6 +362,7 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
     /* Return success. */
     return 0;
 }
+
 /*
  * draw_status_bar
  *   DESCRIPTION: create build buffer and change
@@ -368,19 +371,34 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
  *   RETURN VALUE: none
  *   SIDE EFFECTS: TBD
  */
-/*
-void draw_status_bar(){
+void draw_status_bar(char * status_bar_text, unsigned char * status_build){
 	//text information
-  int i;
-	for (i = 0; i < STATUS_BUILD_SIZE; i++) {
-		status_build[i]=0;
-	}
+  text_to_graphics(status_bar_text, status_build);
+  target_img = 0x0;
+
+  /* Calculate the source address. */
+  //addr = img3 + (show_x >> 2) + show_y * SCROLL_X_WIDTH;
+
+  /* Draw to each plane in the video memory. */
+  for (i = 0; i < 4; i++) {
+      SET_WRITE_MASK(1 << (i + 8));
+      copy_image_status(status_build + ((i + 4) & 3) * SCROLL_SIZE , target_img);
+      //change copy_image function
+
+
+  }
+
+  /*
+   * Change the VGA registers to point the top left of the screen
+   * to the video memory that we just filled.
+   */
 
 
 
-
+  OUTW(0x03D4, (target_img & 0xFF00) | 0x0C);
+  OUTW(0x03D4, ((target_img & 0x00FF) << 8) | 0x0D);
 }
-*/
+
 
 
 
@@ -571,6 +589,9 @@ void show_screen() {
      * Change the VGA registers to point the top left of the screen
      * to the video memory that we just filled.
      */
+
+
+
     OUTW(0x03D4, (target_img & 0xFF00) | 0x0C);
     OUTW(0x03D4, ((target_img & 0x00FF) << 8) | 0x0D);
 }
@@ -1066,6 +1087,29 @@ static void copy_image(unsigned char* img, unsigned short scr_addr) {
         : "eax", "ecx", "memory"
     );
 }
+
+static void copy_image_status(unsigned char* img, unsigned short scr_addr) {
+    /*
+     * memcpy is actually probably good enough here, and is usually
+     * implemented using ISA-specific features like those below,
+     * but the code here provides an example of x86 string moves
+     */
+
+    //new memory size is SCROLL_SIZE- STATUS_BUILD_SIZE=14560
+    //new memory=16000-1440=14560
+    asm volatile ("                                             \n\
+        cld                                                     \n\
+        movl $1440,%%ecx                                       \n\
+        rep movsb    /* copy ECX bytes from M[ESI] to M[EDI] */ \n\
+        "
+        : /* no outputs */
+        : "S"(img), "D"(mem_image + scr_addr)
+        : "eax", "ecx", "memory"
+    );
+}
+
+
+
 
 #ifdef TEXT_RESTORE_PROGRAM
 
