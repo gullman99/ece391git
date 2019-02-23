@@ -59,6 +59,34 @@
 #define RIGHT     67
 #define LEFT      68
 
+
+//For draw_status_bar from modex.h and modex.c
+
+#define IMAGE_X_DIM     320   /* pixels; must be divisible by 4             */
+//#define IMAGE_Y_DIM     200   /* pixels                                     */
+#define IMAGE_X_WIDTH   (IMAGE_X_DIM / 4)          /* addresses (bytes)     */
+//#define SCROLL_X_DIM    IMAGE_X_DIM                /* full image width      */
+//#define SCROLL_Y_DIM    IMAGE_Y_DIM               /* full image width      */
+#define SCROLL_X_WIDTH  (IMAGE_X_DIM / 4)          /* addresses (bytes)     */
+
+
+
+#define SCROLL_SIZE             (SCROLL_X_WIDTH * SCROLL_Y_DIM)
+#define NEW_SCROLL_SIZE         (SCROLL_X_WIDTH * SCROLL_Y_DIM-18)
+#define SCREEN_SIZE             (SCROLL_SIZE * 4 + 1)
+#define NEW_SCREEN_SIZE         (NEW_SCROLL_SIZE * 4 + 1)
+#define BUILD_BUF_SIZE          (NEW_SCREEN_SIZE + 20000)
+#define BUILD_BASE_INIT         ((BUILD_BUF_SIZE - NEW_SCREEN_SIZE) / 2)
+//#define STATUS_BAR_LOCATION 200-18
+
+
+
+//constants for status bar
+#define STATUS_BAR_HEIGHT		    18
+#define STATUS_BUILD_SIZE  		 (STATUS_BAR_HEIGHT*IMAGE_X_DIM)
+#define NEW_MEMORY_SIZE         1600-STATUS_BUILD_SIZE
+
+
 /*
  * If NDEBUG is not defined, we execute sanity checks to make sure that
  * changes to enumerations, bit maps, etc., have been made consistently.
@@ -102,6 +130,12 @@ static void move_left(int* xpos);
 static int unveil_around_player(int play_x, int play_y);
 static void *rtc_thread(void *arg);
 static void *keyboard_thread(void *arg);
+
+static unsigned char status_build[STATUS_BUILD_SIZE];
+
+
+
+
 
 /*
  * prepare_maze_level
@@ -423,6 +457,10 @@ static void *rtc_thread(void *arg) {
         draw_full_block(play_x, play_y, get_player_block(last_dir));
         show_screen();
 
+
+        char status_bar_text[40] = "               My  status               ";
+        draw_status_bar(status_bar_text, status_build);
+
         // get first Periodic Interrupt
         ret = read(fd, &data, sizeof(unsigned long));
 
@@ -526,8 +564,10 @@ static void *rtc_thread(void *arg) {
                     need_redraw = 1;
                 }
             }
-            if (need_redraw)
+            if (need_redraw){
                 show_screen();
+                draw_status_bar(status_bar_text, status_build);
+            }
             need_redraw = 0;
         }
     }

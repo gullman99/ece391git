@@ -75,7 +75,8 @@
 
 //constants for status bar
 #define STATUS_BAR_HEIGHT		    18
-#define STATUS_BUILD_SIZE  		 (STATUS_BAR_HEIGHT*SCROLL_X_WIDTH)
+#define STATUS_BUILD_SIZE  		 (STATUS_BAR_HEIGHT*IMAGE_X_DIM)
+#define STATUS_PLANE_BUILD_SIZE STATUS_BUILD_SIZE/4
 #define NEW_MEMORY_SIZE         1600-STATUS_BUILD_SIZE
 
 
@@ -162,6 +163,14 @@ static void fill_palette();
 static void write_font_data();
 static void set_text_mode_3(int clear_scr);
 static void copy_image(unsigned char* img, unsigned short scr_addr);
+static void copy_image_status(unsigned char* img, unsigned short scr_addr);
+void draw_status_bar(char * status_bar_text, unsigned char * status_build);
+
+
+
+
+
+
 
 /*
  * Images are built in this buffer, then copied to the video memory.
@@ -197,7 +206,7 @@ static void copy_image(unsigned char* img, unsigned short scr_addr);
 #define MEM_FENCE_MAGIC 0xF3
 
 static unsigned char build[BUILD_BUF_SIZE + 2 * MEM_FENCE_WIDTH];
-static unsigned char status_build[STATUS_BUILD_SIZE];
+//static unsigned char status_build[STATUS_BUILD_SIZE];
 static int img3_off;                /* offset of upper left pixel   */
 static unsigned char* img3;         /* pointer to upper left pixel  */
 static int show_x, show_y;          /* logical view coordinates     */
@@ -328,7 +337,7 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
 
 
     /* One display page goes at the start of video memory. */
-    target_img = STATUS_BUILD_SIZE;
+    target_img = STATUS_PLANE_BUILD_SIZE;
 
     /* Map video memory and obtain permission for VGA port access. */
     if (open_memory_and_ports() == -1)
@@ -346,10 +355,7 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
      *   CRTC Mode Control Register    : 0xA3 to 0xE3 (0x3D4/0x17)
      */
 
-    char status_bar_text[40] = "This is my status bar bitch";
 
-
-	  draw_status_bar(status_bar_text, status_build);
     VGA_blank(1);                               /* blank the screen      */
     set_seq_regs_and_reset(mode_X_seq, 0x63);   /* sequencer registers   */
     set_CRTC_registers(mode_X_CRTC);            /* CRT control registers */
@@ -371,18 +377,24 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
  *   RETURN VALUE: none
  *   SIDE EFFECTS: TBD
  */
+
 void draw_status_bar(char * status_bar_text, unsigned char * status_build){
 	//text information
   text_to_graphics(status_bar_text, status_build);
-  target_img = 0x0;
+
+
+  //  target_img = 0;
+  target_img = 80;
 
   /* Calculate the source address. */
   //addr = img3 + (show_x >> 2) + show_y * SCROLL_X_WIDTH;
 
   /* Draw to each plane in the video memory. */
+  int i;
   for (i = 0; i < 4; i++) {
       SET_WRITE_MASK(1 << (i + 8));
-      copy_image_status(status_build + ((i + 4) & 3) * SCROLL_SIZE , target_img);
+      //SET_WRITE_MASK(i);
+      copy_image_status(status_build + i * STATUS_PLANE_BUILD_SIZE , target_img);
       //change copy_image function
 
 
@@ -394,9 +406,9 @@ void draw_status_bar(char * status_bar_text, unsigned char * status_build){
    */
 
 
-
-  OUTW(0x03D4, (target_img & 0xFF00) | 0x0C);
-  OUTW(0x03D4, ((target_img & 0x00FF) << 8) | 0x0D);
+   //only used when trying to write the game screen
+  //OUTW(0x03D4, (target_img & 0xFF00) | 0x0C);
+  //OUTW(0x03D4, ((target_img & 0x00FF) << 8) | 0x0D);
 }
 
 
@@ -584,6 +596,12 @@ void show_screen() {
         SET_WRITE_MASK(1 << (i + 8));
         copy_image(addr + ((p_off - i + 4) & 3) * SCROLL_SIZE + (p_off < i), target_img);
     }
+
+  /*  char status_bar_text[40] = "               My  status               ";
+
+
+	  draw_status_bar(status_bar_text, status_build);
+*/
 
     /*
      * Change the VGA registers to point the top left of the screen
@@ -1096,7 +1114,7 @@ static void copy_image_status(unsigned char* img, unsigned short scr_addr) {
      */
 
     //new memory size is SCROLL_SIZE- STATUS_BUILD_SIZE=14560
-    //new memory=16000-1440=14560
+    //new memory=1440
     asm volatile ("                                             \n\
         cld                                                     \n\
         movl $1440,%%ecx                                       \n\

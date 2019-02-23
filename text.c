@@ -47,16 +47,17 @@
  * Each character is 8x16 pixels and occupies two lines in the table below.
  * Each byte represents a single bitmapped line of a single character.
  */
-
-#define STATUS_BAR_TEXT_SIZE    40
-#define STATUS_BAR_HEIGHT		    18
-#define TEXT_WIDTH              8
-#define TEXT_WIDTH_DIM          8/4
-#define TEXT_HEIGHT             16
-#define STATUS_BUILD_SIZE  		 (STATUS_BAR_HEIGHT*SCROLL_X_WIDTH)
-#define IMAGE_X_DIM     320   /* pixels; must be divisible by 4             */
-#define IMAGE_Y_DIM     200   /* pixels                                     */
-#define IMAGE_X_WIDTH   (IMAGE_X_DIM / 4)          /* addresses (bytes)*/
+#define SCROLL_X_WIDTH            (IMAGE_X_DIM / 4)          /* addresses (bytes)     */
+#define STATUS_BAR_TEXT_SIZE      40
+#define STATUS_BAR_HEIGHT		      18
+#define TEXT_WIDTH                8
+#define TEXT_WIDTH_DIM            8/4
+#define TEXT_HEIGHT               16
+#define STATUS_BUILD_SIZE  		    (STATUS_BAR_HEIGHT*IMAGE_X_WIDTH)
+#define STATUS_PLANE_BUILD_SIZE   STATUS_BUILD_SIZE/4
+#define IMAGE_X_DIM               320   /* pixels; must be divisible by 4             */
+#define IMAGE_Y_DIM               200   /* pixels                                     */
+#define IMAGE_X_WIDTH             (IMAGE_X_DIM / 4)          /* addresses (bytes)*/
 
 
 void text_to_graphics(char * text, unsigned char * status_buffer){
@@ -66,15 +67,15 @@ void text_to_graphics(char * text, unsigned char * status_buffer){
 
   //TEXT_WIDTH? OR TEXT_WIDTH_DIM
   unsigned char char_data;
-  unsigned char temp_buffer[STATUS_BAR_TEXT_SIZE*STATUS_BAR_HEIGHT*TEXT_WIDTH];
+//  unsigned char temp_buffer[STATUS_BAR_TEXT_SIZE*STATUS_BAR_HEIGHT*TEXT_WIDTH];
   unsigned char convert_to_bitmask[STATUS_BAR_TEXT_SIZE*STATUS_BAR_HEIGHT*TEXT_WIDTH];
-
   int stringSize= strlen(text);
   int i,j,k;
   for(i=0;i<stringSize;i++){
     //status_buffer
     for(k=0;k<TEXT_HEIGHT;k++){
       for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
+        //warning array subscript has type char
         char_data=font_data[text[i]][k];
         if(char_data>>j&0x01){
           convert_to_bitmask[j+k*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT]=5;
@@ -85,11 +86,20 @@ void text_to_graphics(char * text, unsigned char * status_buffer){
       }
     }
   }
-  for(i=0;i<stringSize;i++){
-    //status_buffer
+  //create background of pallette 1
+  for(i=0;i<STATUS_BUILD_SIZE;i++){
+    //status_buffer is 18x320
+    status_buffer[i]=1;
+  }
+
+
+
+
+
+for(i=0; i<stringSize; i++){
     for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
       for(k=0;k<TEXT_HEIGHT;k++){
-        status_buffer[(j%4)*(STATUS_BUILD_SIZE/4)+j/4+k*Image_X_Width+2*i] = convert_to_bitmask[j+k*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
+        status_buffer[(j%4)*(STATUS_BUILD_SIZE/4)+j/4+k*IMAGE_X_WIDTH+2*i] = convert_to_bitmask[j+k*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
       }
     }
   }
