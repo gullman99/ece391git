@@ -381,10 +381,14 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
 void draw_status_bar(char * status_bar_text, unsigned char * status_build){
 	//text information
   text_to_graphics(status_bar_text, status_build);
-
+  int p_off;
 
   //  target_img = 0;
-  target_img = 80;
+  target_img = 0;
+  p_off = 3;
+
+//copy_image(addr + ((p_off - i + 4) & 3) * SCROLL_SIZE + (p_off < i), target_img);
+
 
   /* Calculate the source address. */
   //addr = img3 + (show_x >> 2) + show_y * SCROLL_X_WIDTH;
@@ -394,7 +398,7 @@ void draw_status_bar(char * status_bar_text, unsigned char * status_build){
   for (i = 0; i < 4; i++) {
       SET_WRITE_MASK(1 << (i + 8));
       //SET_WRITE_MASK(i);
-      copy_image_status(status_build + i * STATUS_PLANE_BUILD_SIZE , target_img);
+      copy_image_status(status_build + ((p_off - i + 4) & 3)* STATUS_PLANE_BUILD_SIZE , target_img);
       //change copy_image function
 
 

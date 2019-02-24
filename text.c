@@ -59,25 +59,49 @@
 #define IMAGE_Y_DIM               200   /* pixels                                     */
 #define IMAGE_X_WIDTH             (IMAGE_X_DIM / 4)          /* addresses (bytes)*/
 
+/*void concatenatePlanes(unsigned char * plane0, unsigned char* plane1, unsigned char * plane2, unsigned char * plane3, unsigned char * status_buffer){
+  int i;
+  for(i=0;i<STATUS_PLANE_BUILD_SIZE;i++){
+    status_buffer[i]=plane3[i];
+  }
+  for(i=0;i<STATUS_PLANE_BUILD_SIZE;i++){
+    status_buffer[i+STATUS_PLANE_BUILD_SIZE]=plane2[i];
+  }
+  for(i=0;i<STATUS_PLANE_BUILD_SIZE;i++){
+    status_buffer[i+STATUS_PLANE_BUILD_SIZE*2]=plane1[i];
+  }
+  for(i=0;i<STATUS_PLANE_BUILD_SIZE;i++){
+    status_buffer[i+STATUS_PLANE_BUILD_SIZE*3]=plane0[i];
+  }
+}
+
+*/
+
+
+
 
 void text_to_graphics(char * text, unsigned char * status_buffer){
   //////TEXT to graphics
   //pad zeros on each side
   //planes
+  //status_buffer[((3-j)%4)*(STATUS_BUILD_SIZE/4)+(j/4)+(k*IMAGE_X_WIDTH)+(2*i)] = convert_to_bitmask[j+(k-1)*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
+
 
   //TEXT_WIDTH? OR TEXT_WIDTH_DIM
   unsigned char char_data;
 //  unsigned char temp_buffer[STATUS_BAR_TEXT_SIZE*STATUS_BAR_HEIGHT*TEXT_WIDTH];
-  unsigned char convert_to_bitmask[STATUS_BAR_TEXT_SIZE*STATUS_BAR_HEIGHT*TEXT_WIDTH];
-  int stringSize= strlen(text);
+  unsigned char convert_to_bitmask[IMAGE_X_DIM*TEXT_HEIGHT];
+  int stringSize= 40;
   int i,j,k;
+  int txtIdx, plane;
   for(i=0;i<stringSize;i++){
     //status_buffer
+    txtIdx=(int)text[i];
     for(k=0;k<TEXT_HEIGHT;k++){
       for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
         //warning array subscript has type char
-        char_data=font_data[text[i]][k];
-        if(char_data>>j&0x01){
+        char_data=font_data[txtIdx][k];
+        if((char_data<<j)&0x80){
           convert_to_bitmask[j+k*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT]=5;
         }
         else{
@@ -91,18 +115,38 @@ void text_to_graphics(char * text, unsigned char * status_buffer){
     //status_buffer is 18x320
     status_buffer[i]=1;
   }
-
-
-
-
-
+  /*for(i=0; i<stringSize; i++){
+      for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
+        for(k=0;k<STATUS_BAR_HEIGHT;k++){
+  */
+/*unsigned char plane0[STATUS_PLANE_BUILD_SIZE];  //plane 0
+unsigned char plane1[STATUS_PLANE_BUILD_SIZE];  //plane 1
+unsigned char plane2[STATUS_PLANE_BUILD_SIZE];  //plane 2
+unsigned char plane3[STATUS_PLANE_BUILD_SIZE];  //plane 3
+*/
+//int plane;
 for(i=0; i<stringSize; i++){
     for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
-      for(k=0;k<TEXT_HEIGHT;k++){
-        status_buffer[(j%4)*(STATUS_BUILD_SIZE/4)+j/4+k*IMAGE_X_WIDTH+2*i] = convert_to_bitmask[j+k*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
+      for(k=1;k<STATUS_BAR_HEIGHT-1;k++){
+      /*  plane = j%4;
+        if(plane==0){
+          plane0[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
+        }
+        else if(plane==1){
+          plane1[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
+        }
+        else if(plane==2){
+          plane2[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
+        }
+        else{
+          plane3[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
+        }*/
+        status_buffer[((3-j)%4)*(STATUS_BUILD_SIZE/4)+(j/4)+(k*IMAGE_X_WIDTH)+(2*i)] = convert_to_bitmask[j+(k-1)*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
       }
     }
   }
+/*  concatenatePlanes(plane0, plane1, plane2, plane3, status_buffer);
+  */
 }
 
 
