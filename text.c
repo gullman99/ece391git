@@ -53,7 +53,7 @@
 #define TEXT_WIDTH                8
 #define TEXT_WIDTH_DIM            8/4
 #define TEXT_HEIGHT               16
-#define STATUS_BUILD_SIZE  		    (STATUS_BAR_HEIGHT*IMAGE_X_WIDTH)
+#define STATUS_BUILD_SIZE  		    (STATUS_BAR_HEIGHT*IMAGE_X_DIM)
 #define STATUS_PLANE_BUILD_SIZE   STATUS_BUILD_SIZE/4
 #define IMAGE_X_DIM               320   /* pixels; must be divisible by 4             */
 #define IMAGE_Y_DIM               200   /* pixels                                     */
@@ -74,8 +74,8 @@
     status_buffer[i+STATUS_PLANE_BUILD_SIZE*3]=plane0[i];
   }
 }
-
 */
+
 
 
 
@@ -90,22 +90,26 @@ void text_to_graphics(char * text, unsigned char * status_buffer){
   //TEXT_WIDTH? OR TEXT_WIDTH_DIM
   unsigned char char_data;
 //  unsigned char temp_buffer[STATUS_BAR_TEXT_SIZE*STATUS_BAR_HEIGHT*TEXT_WIDTH];
-  unsigned char convert_to_bitmask[IMAGE_X_DIM*TEXT_HEIGHT];
+  unsigned char convert_to_bitmask[IMAGE_X_DIM*STATUS_BAR_HEIGHT];
   int stringSize= 40;
   int i,j,k;
-  int txtIdx, plane;
+  int txtIdx;
+  //, plane;
   for(i=0;i<stringSize;i++){
     //status_buffer
     txtIdx=(int)text[i];
-    for(k=0;k<TEXT_HEIGHT;k++){
+    for(k=0;k<STATUS_BAR_HEIGHT;k++){
       for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
         //warning array subscript has type char
         char_data=font_data[txtIdx][k];
+        if(k==0||k==STATUS_BAR_HEIGHT-1){
+          convert_to_bitmask[j+k*IMAGE_X_DIM+i*TEXT_WIDTH]=1;
+        }
         if((char_data<<j)&0x80){
-          convert_to_bitmask[j+k*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT]=5;
+          convert_to_bitmask[j+k*IMAGE_X_DIM+i*TEXT_WIDTH]=5;
         }
         else{
-          convert_to_bitmask[j+k*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT]=1;
+          convert_to_bitmask[j+k*IMAGE_X_DIM+i*TEXT_WIDTH]=1;
         }
       }
     }
@@ -125,29 +129,33 @@ unsigned char plane2[STATUS_PLANE_BUILD_SIZE];  //plane 2
 unsigned char plane3[STATUS_PLANE_BUILD_SIZE];  //plane 3
 */
 //int plane;
-for(i=0; i<stringSize; i++){
+/*for(i=0; i<STATUS_BAR_TEXT_SIZE; i++){
     for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
-      for(k=1;k<STATUS_BAR_HEIGHT-1;k++){
-      /*  plane = j%4;
+      for(k=1;k<STATUS_BAR_HEIGHT-1;k++){*/
+        /*plane = j%4;
         if(plane==0){
-          plane0[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
+          plane0[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*IMAGE_X_DIM+i*TEXT_WIDTH];
         }
         else if(plane==1){
-          plane1[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
+          plane1[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*IMAGE_X_DIM+i*TEXT_WIDTH];
         }
         else if(plane==2){
-          plane2[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
+          plane2[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*IMAGE_X_DIM+i*TEXT_WIDTH];
         }
         else{
-          plane3[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
+          plane3[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*IMAGE_X_DIM+i*TEXT_WIDTH];
         }*/
-        status_buffer[((3-j)%4)*(STATUS_BUILD_SIZE/4)+(j/4)+(k*IMAGE_X_WIDTH)+(2*i)] = convert_to_bitmask[j+(k-1)*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
+        //status_buffer[((j)%4)*(STATUS_BUILD_SIZE/4)+(j/4)+(k*IMAGE_X_DIM)+(2*i)] = convert_to_bitmask[j+(k-1)*IMAGE_X_DIM+i*TEXT_WIDTH];
+
+    for(i=0; i<4; i++){
+      for(j=0;j<STATUS_PLANE_BUILD_SIZE;j++){
+
+        status_buffer[(3-i)*1440+j] = convert_to_bitmask[i+j*4];
+
       }
     }
   }
-/*  concatenatePlanes(plane0, plane1, plane2, plane3, status_buffer);
-  */
-}
+  //concatenatePlanes(plane0, plane1, plane2, plane3, status_buffer);
 
 
 

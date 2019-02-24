@@ -100,6 +100,8 @@ static unsigned short mode_X_CRTC[NUM_CRTC_REGS] = {
     0x6C18
 };
 
+//6B may help with black line
+
 /*
 static unsigned char mode_X_attr[NUM_ATTR_REGS * 2] = {
     0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03,
@@ -206,7 +208,7 @@ void draw_status_bar(char * status_bar_text, unsigned char * status_build);
 #define MEM_FENCE_MAGIC 0xF3
 
 static unsigned char build[BUILD_BUF_SIZE + 2 * MEM_FENCE_WIDTH];
-//static unsigned char status_build[STATUS_BUILD_SIZE];
+static unsigned char status_build[STATUS_BUILD_SIZE];
 static int img3_off;                /* offset of upper left pixel   */
 static unsigned char* img3;         /* pointer to upper left pixel  */
 static int show_x, show_y;          /* logical view coordinates     */
@@ -337,7 +339,7 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
 
 
     /* One display page goes at the start of video memory. */
-    target_img = STATUS_PLANE_BUILD_SIZE;
+    target_img = 0x0700;//STATUS_PLANE_BUILD_SIZE;
 
     /* Map video memory and obtain permission for VGA port access. */
     if (open_memory_and_ports() == -1)
@@ -384,7 +386,7 @@ void draw_status_bar(char * status_bar_text, unsigned char * status_build){
   int p_off;
 
   //  target_img = 0;
-  target_img = 0;
+
   p_off = 3;
 
 //copy_image(addr + ((p_off - i + 4) & 3) * SCROLL_SIZE + (p_off < i), target_img);
@@ -398,7 +400,7 @@ void draw_status_bar(char * status_bar_text, unsigned char * status_build){
   for (i = 0; i < 4; i++) {
       SET_WRITE_MASK(1 << (i + 8));
       //SET_WRITE_MASK(i);
-      copy_image_status(status_build + ((p_off - i + 4) & 3)* STATUS_PLANE_BUILD_SIZE , target_img);
+      copy_image_status(status_build + ((p_off - i + 4) & 3)* STATUS_PLANE_BUILD_SIZE , 0);
       //change copy_image function
 
 
@@ -601,11 +603,11 @@ void show_screen() {
         copy_image(addr + ((p_off - i + 4) & 3) * SCROLL_SIZE + (p_off < i), target_img);
     }
 
-  /*  char status_bar_text[40] = "               My  status               ";
+    char status_bar_text[40] = "               My  status               ";
 
 
 	  draw_status_bar(status_bar_text, status_build);
-*/
+
 
     /*
      * Change the VGA registers to point the top left of the screen
