@@ -60,6 +60,7 @@ static void add_a_fruit_internal();
 #if (TEST_MAZE_GEN == 0) /* not used when testing maze generation */
 static unsigned char* find_block(int x, int y);
 static void _add_a_fruit(int show);
+extern int get_num_fruit();
 #endif
 
 /*
@@ -90,6 +91,13 @@ static int exit_x, exit_y;      /* lattice point of maze exit   */
  * after a call to make_maze
  */
 #define MAZE_INDEX(a,b) ((a) + ((b) + 1) * maze_x_dim * 2)
+
+
+extern int get_num_fruit(){
+  return n_fruits;
+}
+
+
 
 /*
  * mark_maze_area

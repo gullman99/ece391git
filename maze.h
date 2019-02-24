@@ -96,4 +96,7 @@ extern unsigned char* get_player_mask(dir_t cur_dir);
 /* determine which directions are open to movement from a given maze point */
 extern void find_open_directions(int x, int y, int op[NUM_DIRS]);
 
+extern int get_num_fruit();
+
+
 #endif /* MAZE_H */

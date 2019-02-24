@@ -85,8 +85,12 @@
 #define STATUS_BAR_HEIGHT		    18
 #define STATUS_BUILD_SIZE  		 (STATUS_BAR_HEIGHT*IMAGE_X_DIM)
 #define NEW_MEMORY_SIZE         1600-STATUS_BUILD_SIZE
-
-
+#define LEVEL                   10
+#define FRUIT                   14
+#define TIMEMIN1                31
+#define TIMEMIN0                32
+#define TIMESEC1                34
+#define TIMESEC0                35
 /*
  * If NDEBUG is not defined, we execute sanity checks to make sure that
  * changes to enumerations, bit maps, etc., have been made consistently.
@@ -132,8 +136,34 @@ static void *rtc_thread(void *arg);
 static void *keyboard_thread(void *arg);
 
 static unsigned char status_build[STATUS_BUILD_SIZE];
+static void set_status_bar_text(char * status_bar_text, int levelNum, int fruit, int timeMin0, int timeMin1, int timeSec0, int timeSec1);
+
+void set_status_bar_text(char * status_bar_text, int levelNum, int fruit, int timeMin0, int timeMin1, int timeSec0, int timeSec1){
+  //level    fruit    time
+  /*#define LEVEL                   10
+  #define FRUIT                   20
+  #define TIMEMIN0                30
+  #define TIMEMIN1                31MIN
+
+  #define TIMESEC0                33
+  #define TIMESEC1                34*/
+  //status_bar_text[]
+  char levelChar = '0'+ levelNum;
+  char fruitChar = '0'+ fruit;
+  char timeMin0Char = '0'+ timeMin0;
+  char timeMin1Char = '0'+ timeMin1;
+  char timeSec0Char = '0'+ timeSec0;
+  char timeSec1Char = '0'+ timeSec1;
+
+  status_bar_text[LEVEL] = levelChar;
+  status_bar_text[FRUIT] = fruitChar;
+  status_bar_text[TIMEMIN0] = timeMin0Char;
+  status_bar_text[TIMEMIN1] = timeMin1Char;
+  status_bar_text[TIMESEC0] = timeSec0Char;
+  status_bar_text[TIMESEC1] = timeSec1Char;
 
 
+}
 
 
 
@@ -457,14 +487,38 @@ static void *rtc_thread(void *arg) {
         draw_full_block(play_x, play_y, get_player_block(last_dir));
         show_screen();
 
+        char status_bar_text[40]="    LEVEL -   - FRUITS   TIME: --:--    ";
+        int levelNum, fruit, timeMin0, timeMin1, timeSec0, timeSec1;
+        levelNum = 0;
+        fruit = 0;
+        timeMin0=0;
+        timeMin1=0;
+        timeSec0=0;
+        timeSec1=0;
 
-        char status_bar_text[40] = "               My  status               ";
-        draw_status_bar(status_bar_text, status_build);
 
-        // get first Periodic Interrupt
         ret = read(fd, &data, sizeof(unsigned long));
-
+		
+		int totalSecs, totalMins;
+		
         while ((quit_flag == 0) && (goto_next_level == 0)) {
+			levelNum = level;
+			fruit = get_num_fruit();
+			totalSecs = total/32;
+			totalMins = totalSecs/60;
+			timeMin0=  totalMins%10;
+			timeMin1= (totalMins/10)%10;
+			timeSec0= (totalSecs)%10;
+			timeSec1= (((totalSecs)/10)%60)%6;
+			
+			
+            set_status_bar_text(status_bar_text, level, get_num_fruit(), timeMin0, timeMin1, timeSec0, timeSec1);
+            //char status_bar_text[40] = "               My  status               ";
+            draw_status_bar(status_bar_text, status_build);
+
+
+
+            // get first Periodic Interrupt
             // Wait for Periodic Interrupt
             ret = read(fd, &data, sizeof(unsigned long));
 
