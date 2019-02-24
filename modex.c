@@ -97,7 +97,7 @@ static unsigned short mode_X_CRTC[NUM_CRTC_REGS] = {
     0x5F00, 0x4F01, 0x5002, 0x8203, 0x5404, 0x8005, 0xBF06, 0x1F07,
     0x0008, 0x0109, 0x000A, 0x000B, 0x000C, 0x000D, 0x000E, 0x000F,
     0x9C10, 0x8E11, 0x8F12, 0x2813, 0x0014, 0x9615, 0xB916, 0xE317,
-    0x6C18
+    0x6B18
 };
 
 //6B may help with black line
@@ -208,7 +208,7 @@ void draw_status_bar(char * status_bar_text, unsigned char * status_build);
 #define MEM_FENCE_MAGIC 0xF3
 
 static unsigned char build[BUILD_BUF_SIZE + 2 * MEM_FENCE_WIDTH];
-static unsigned char status_build[STATUS_BUILD_SIZE];
+//static unsigned char status_build[STATUS_BUILD_SIZE];
 static int img3_off;                /* offset of upper left pixel   */
 static unsigned char* img3;         /* pointer to upper left pixel  */
 static int show_x, show_y;          /* logical view coordinates     */
@@ -603,10 +603,10 @@ void show_screen() {
         copy_image(addr + ((p_off - i + 4) & 3) * SCROLL_SIZE + (p_off < i), target_img);
     }
 
-    char status_bar_text[40] = "               My  status               ";
 
 
-	  draw_status_bar(status_bar_text, status_build);
+
+	  //draw_status_bar(status_bar_text, status_build);
 
 
     /*

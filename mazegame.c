@@ -131,7 +131,7 @@ static int unveil_around_player(int play_x, int play_y);
 static void *rtc_thread(void *arg);
 static void *keyboard_thread(void *arg);
 
-//static unsigned char status_build[STATUS_BUILD_SIZE];
+static unsigned char status_build[STATUS_BUILD_SIZE];
 
 
 
@@ -458,8 +458,8 @@ static void *rtc_thread(void *arg) {
         show_screen();
 
 
-/*        char status_bar_text[40] = "               My  status               ";
-        draw_status_bar(status_bar_text, status_build);*/
+        char status_bar_text[40] = "               My  status               ";
+        draw_status_bar(status_bar_text, status_build);
 
         // get first Periodic Interrupt
         ret = read(fd, &data, sizeof(unsigned long));
@@ -566,7 +566,7 @@ static void *rtc_thread(void *arg) {
             }
             if (need_redraw){
                 show_screen();
-                //draw_status_bar(status_bar_text, status_build);
+                draw_status_bar(status_bar_text, status_build);
             }
             need_redraw = 0;
         }
