@@ -137,6 +137,9 @@ static void *keyboard_thread(void *arg);
 
 static unsigned char status_build[STATUS_BUILD_SIZE];
 static void set_status_bar_text(char * status_bar_text, int levelNum, int fruit, int timeMin0, int timeMin1, int timeSec0, int timeSec1);
+static unsigned char bitmaskResult[BLOCK_X_DIM*BLOCK_Y_DIM];
+
+
 
 void set_status_bar_text(char * status_bar_text, int levelNum, int fruit, int timeMin0, int timeMin1, int timeSec0, int timeSec1){
   //level    fruit    time
@@ -483,8 +486,10 @@ static void *rtc_thread(void *arg) {
 
         // Show maze around the player's original position
         (void)unveil_around_player(play_x, play_y);
-
-        draw_full_block(play_x, play_y, get_player_block(last_dir));
+		
+		bitmaskResultBlock(get_player_block(last_dir), get_player_mask(last_dir), get_player_block(-2), bitmaskResult); //-2 for BLOCK_EMPTY
+        //draw_full_block(play_x, play_y, get_player_block(last_dir));
+		draw_full_block(play_x, play_y, bitmaskResult);
         show_screen();
 
         char status_bar_text[40]="    LEVEL -   - FRUITS   TIME: --:--    ";
@@ -614,7 +619,9 @@ static void *rtc_thread(void *arg) {
                             move_left(&play_x);
                             break;
                     }
-                    draw_full_block(play_x, play_y, get_player_block(last_dir));
+					bitmaskResultBlock(get_player_block(last_dir), get_player_mask(last_dir), get_player_block(-2), bitmaskResult); //-2 for BLOCK_EMPTY
+					//draw_full_block(play_x, play_y, get_player_block(last_dir));                  
+					draw_full_block(play_x, play_y, bitmaskResult);
                     need_redraw = 1;
                 }
             }

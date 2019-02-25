@@ -636,6 +636,38 @@ void clear_screens() {
     memset(mem_image, 0, MODE_X_MEM_SIZE);
 }
 
+/* bitmaskPlayerBlock
+//
+// inputs: get_player_block(pos), get_player_block(-2) 
+//
+//
+//
+//
+*/
+ void bitmaskResultBlock(unsigned char* playerBlock, unsigned char * bitmaskBlock, unsigned char* backgroundBlock, unsigned char * bitmaskResult){
+	 
+	int i=0;
+	int j=0;
+	
+	//unsigned char * bitmaskBlock = get_player_mask();
+	
+	//background
+	
+	for (i = 0; i < BLOCK_X_DIM; i++){
+      for (j = 0; j < BLOCK_Y_DIM; j++){
+		if(bitmaskBlock[i+j*BLOCK_X_DIM]==0){
+			//bitmaskResult[i+j*BLOCK_X_DIM] = backgroundBlock[(i+(play_x%BLOCK_X_DIM)%BLOCK_X_DIM)+j+play_y%BLOCK_*BLOCK_X_DIM + ];
+			bitmaskResult[i+j*BLOCK_X_DIM] = backgroundBlock[i+j*BLOCK_X_DIM];
+		}
+		else{
+			bitmaskResult[i+j*BLOCK_X_DIM] = playerBlock[i+j*BLOCK_X_DIM];
+		}
+	  }
+	} 	 
+ }
+
+	
+
 /*
  * draw_full_block
  *   DESCRIPTION: Draw a BLOCK_X_DIM x BLOCK_Y_DIM block at absolute
@@ -701,6 +733,10 @@ void draw_full_block(int pos_x, int pos_y, unsigned char* blk) {
         blk += x_left;
     }
 }
+
+
+//getplayermask()
+//draw_back_buff
 
 /*
  * The functions inside the preprocessor block below rely on functions

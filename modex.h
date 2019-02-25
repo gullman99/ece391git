@@ -138,6 +138,7 @@ extern int draw_horiz_line(int y);
 extern int draw_vert_line(int x);
 void draw_status_bar(char * status_bar_text, unsigned char * status_build);
 
+extern void bitmaskResultBlock(unsigned char* playerBlock, unsigned char* bitmaskBlock, unsigned char* backgroundBlock, unsigned char * bitmaskResult);
 
 
 #endif /* MODEX_H */
