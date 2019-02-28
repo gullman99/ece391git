@@ -77,16 +77,26 @@
 */
 
 
+/*
+ * text_to_graphics
+ *   DESCRIPTION: create status build buffer and change status colors as well
+ *   INPUTS: text, status build buffer, statusColor1, statusColor2
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: creates the status bar 
+ */
 
 
 
-void text_to_graphics(char * text, unsigned char * status_buffer){
+void text_to_graphics(char * text, unsigned char * status_buffer, int statusColor1, int statusColor2){
   //////TEXT to graphics
   //pad zeros on each side
   //planes
   //status_buffer[((3-j)%4)*(STATUS_BUILD_SIZE/4)+(j/4)+(k*IMAGE_X_WIDTH)+(2*i)] = convert_to_bitmask[j+(k-1)*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
 
-
+  /*int statusColor1, statusColor2;
+  statusColor1=1;
+  statusColor2=5;*/
   //TEXT_WIDTH? OR TEXT_WIDTH_DIM
   unsigned char char_data;
 //  unsigned char temp_buffer[STATUS_BAR_TEXT_SIZE*STATUS_BAR_HEIGHT*TEXT_WIDTH];
@@ -103,13 +113,13 @@ void text_to_graphics(char * text, unsigned char * status_buffer){
         //warning array subscript has type char
         char_data=font_data[txtIdx][k];
         if(k==0||k==STATUS_BAR_HEIGHT-1){
-          convert_to_bitmask[j+k*IMAGE_X_DIM+i*TEXT_WIDTH]=1;
+          convert_to_bitmask[j+k*IMAGE_X_DIM+i*TEXT_WIDTH]=statusColor1;
         }
         if((char_data<<j)&0x80){
-          convert_to_bitmask[j+k*IMAGE_X_DIM+i*TEXT_WIDTH]=5;
+          convert_to_bitmask[j+k*IMAGE_X_DIM+i*TEXT_WIDTH]=statusColor2;
         }
         else{
-          convert_to_bitmask[j+k*IMAGE_X_DIM+i*TEXT_WIDTH]=1;
+          convert_to_bitmask[j+k*IMAGE_X_DIM+i*TEXT_WIDTH]=statusColor1;
         }
       }
     }
@@ -154,9 +164,92 @@ unsigned char plane3[STATUS_PLANE_BUILD_SIZE];  //plane 3
 
       }
     }
+}
+
+
+
+
+
+/*
+void text_to_graphics(char * text, unsigned char * status_buffer){
+  //////TEXT to graphics
+  //pad zeros on each side
+  //planes
+  //status_buffer[((3-j)%4)*(STATUS_BUILD_SIZE/4)+(j/4)+(k*IMAGE_X_WIDTH)+(2*i)] = convert_to_bitmask[j+(k-1)*TEXT_WIDTH+i*TEXT_WIDTH*TEXT_HEIGHT];
+
+  int statusColor1, statusColor2;
+  statusColor1=1;
+  statusColor2=5;
+  //TEXT_WIDTH? OR TEXT_WIDTH_DIM
+  unsigned char char_data;
+//  unsigned char temp_buffer[STATUS_BAR_TEXT_SIZE*STATUS_BAR_HEIGHT*TEXT_WIDTH];
+  unsigned char convert_to_bitmask[IMAGE_X_DIM*STATUS_BAR_HEIGHT];
+  int stringSize= 40;
+  int i,j,k;
+  int txtIdx;
+  //, plane;
+  for(i=0;i<stringSize;i++){
+    //status_buffer
+    txtIdx=(int)text[i];
+    for(k=0;k<STATUS_BAR_HEIGHT;k++){
+      for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
+        //warning array subscript has type char
+        char_data=font_data[txtIdx][k];
+        if(k==0||k==STATUS_BAR_HEIGHT-1){
+          convert_to_bitmask[j+k*IMAGE_X_DIM+i*TEXT_WIDTH]=statusColor1;
+        }
+        if((char_data<<j)&0x80){
+          convert_to_bitmask[j+k*IMAGE_X_DIM+i*TEXT_WIDTH]=statusColor2;
+        }
+        else{
+          convert_to_bitmask[j+k*IMAGE_X_DIM+i*TEXT_WIDTH]=statusColor1;
+        }
+      }
+    }
+  }
+  //create background of pallette 1
+  for(i=0;i<STATUS_BUILD_SIZE;i++){
+    //status_buffer is 18x320
+    status_buffer[i]=1;
+  }
+  /*for(i=0; i<stringSize; i++){
+      for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
+        for(k=0;k<STATUS_BAR_HEIGHT;k++){
+  */
+/*unsigned char plane0[STATUS_PLANE_BUILD_SIZE];  //plane 0
+unsigned char plane1[STATUS_PLANE_BUILD_SIZE];  //plane 1
+unsigned char plane2[STATUS_PLANE_BUILD_SIZE];  //plane 2
+unsigned char plane3[STATUS_PLANE_BUILD_SIZE];  //plane 3
+*/
+//int plane;
+/*for(i=0; i<STATUS_BAR_TEXT_SIZE; i++){
+    for(j=0;j<TEXT_WIDTH;j++){    //TEXT_WIDTH or TEXT_WIDTH_DIM
+      for(k=1;k<STATUS_BAR_HEIGHT-1;k++){*/
+        /*plane = j%4;
+        if(plane==0){
+          plane0[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*IMAGE_X_DIM+i*TEXT_WIDTH];
+        }
+        else if(plane==1){
+          plane1[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*IMAGE_X_DIM+i*TEXT_WIDTH];
+        }
+        else if(plane==2){
+          plane2[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*IMAGE_X_DIM+i*TEXT_WIDTH];
+        }
+        else{
+          plane3[(j/4)+(k*2*STATUS_BAR_TEXT_SIZE)+(2*i)] = convert_to_bitmask[j+(k-1)*IMAGE_X_DIM+i*TEXT_WIDTH];
+        }*/
+        //status_buffer[((j)%4)*(STATUS_BUILD_SIZE/4)+(j/4)+(k*IMAGE_X_DIM)+(2*i)] = convert_to_bitmask[j+(k-1)*IMAGE_X_DIM+i*TEXT_WIDTH];
+/*
+    for(i=0; i<4; i++){
+      for(j=0;j<STATUS_PLANE_BUILD_SIZE;j++){
+
+        status_buffer[(3-i)*1440+j] = convert_to_bitmask[i+j*4];
+
+      }
+    }
   }
   //concatenatePlanes(plane0, plane1, plane2, plane3, status_buffer);
-
+*/
 
 
 

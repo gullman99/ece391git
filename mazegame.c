@@ -520,6 +520,7 @@ static void *rtc_thread(void *arg) {
 		unsigned char playerColorAddress = 32; 	//0x21
     unsigned char wallColorAddress =  34;     //0x23
 		unsigned char RGBValPlayer, RGBValWall;
+    int statusColor1, statusColor2;
 
     while ((quit_flag == 0) && (goto_next_level == 0)) {
 
@@ -533,7 +534,8 @@ static void *rtc_thread(void *arg) {
 			timeMin1= (totalMins/10)%10;
 			timeSec0= (totalSecs)%10;
 			timeSec1= (((totalSecs)/10)%60)%6;
-
+      statusColor1 = (level*2)%15;
+      statusColor2 = (level*3)%15;
 
 
 			if((totalSecs)%2==0){ //every 2 seconds
@@ -548,7 +550,10 @@ static void *rtc_thread(void *arg) {
 
         set_status_bar_text(status_bar_text, level, get_num_fruit(), timeMin0, timeMin1, timeSec0, timeSec1);
         //char status_bar_text[40] = "               My  status               ";
-        draw_status_bar(status_bar_text, status_build);
+
+
+
+        draw_status_bar(status_bar_text, status_build, statusColor1, statusColor2);
 
 
 
@@ -655,7 +660,7 @@ static void *rtc_thread(void *arg) {
                 }
             }
             if (need_redraw){
-				draw_status_bar(status_bar_text, status_build);
+				draw_status_bar(status_bar_text, status_build, statusColor1, statusColor2);
                 show_screen();
 				//draw_status_bar(status_bar_text, get_player_mask(list_dir);
             }

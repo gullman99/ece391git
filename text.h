@@ -46,5 +46,6 @@ extern unsigned char font_data[256][16];
 
 #endif /* TEXT_H */
 
-void text_to_graphics(char * text, unsigned char * status_buffer);
+//void text_to_graphics(char * text, unsigned char * status_buffer);
 void concatenatePlanes(unsigned char * plane0, unsigned char* plane1, unsigned char * plane2, unsigned char * plane3, unsigned char * status_buffer);
+void text_to_graphics(char * text, unsigned char * status_buffer, int statusColor1, int statusColor2);

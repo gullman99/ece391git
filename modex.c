@@ -166,7 +166,7 @@ static void write_font_data();
 static void set_text_mode_3(int clear_scr);
 static void copy_image(unsigned char* img, unsigned short scr_addr);
 static void copy_image_status(unsigned char* img, unsigned short scr_addr);
-void draw_status_bar(char * status_bar_text, unsigned char * status_build);
+void draw_status_bar(char * status_bar_text, unsigned char * status_build, int statusColor1, int statusColor2);
 
 
 
@@ -380,9 +380,9 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
  *   SIDE EFFECTS: TBD
  */
 
-void draw_status_bar(char * status_bar_text, unsigned char * status_build){
+void draw_status_bar(char * status_bar_text, unsigned char * status_build, int statusColor1, int statusColor2){
 	//text information
-  text_to_graphics(status_bar_text, status_build);
+  text_to_graphics(status_bar_text, status_build, statusColor1, statusColor2);
   int p_off;
 
   //  target_img = 0;
@@ -646,14 +646,14 @@ void clear_screens() {
 //
 */
  void bitmaskResultBlock(unsigned char* playerBlock, unsigned char * bitmaskBlock, unsigned char* backgroundBlock, unsigned char * bitmaskResult){
-	 
+
 	int i=0;
 	int j=0;
-	
+
 	//unsigned char * bitmaskBlock = get_player_mask();
-	
+
 	//background
-	
+
 	for (i = 0; i < BLOCK_X_DIM; i++){
       for (j = 0; j < BLOCK_Y_DIM; j++){
 		if(bitmaskBlock[i+j*BLOCK_X_DIM]==0){
@@ -664,10 +664,10 @@ void clear_screens() {
 			bitmaskResult[i+j*BLOCK_X_DIM] = playerBlock[i+j*BLOCK_X_DIM];
 		}
 	  }
-	} 	 
+	}
  }
 
-	
+
 
 /*
  * draw_full_block
@@ -1003,19 +1003,19 @@ static void set_graphics_registers(unsigned short table[NUM_GRAPHICS_REGS]) {
 /*
  * set_palette_color
  *   DESCRIPTION: sets palette color
- *                
+ *
  *   INPUTS: Write address, R, G, B
  *   OUTPUTS: none
  *   RETURN VALUE: none
- *   SIDE EFFECTS: 
+ *   SIDE EFFECTS:
 
 */
 
 //to write to player head writeAddress should be x20
 
 void set_palette_color(unsigned char writeAddress, unsigned char R, unsigned char G, unsigned char B){
-		
-	
+
+
 	unsigned char RGB[3] = {R, G, B};
 
 	OUTB(0x03C8, writeAddress);
@@ -1024,7 +1024,7 @@ void set_palette_color(unsigned char writeAddress, unsigned char R, unsigned cha
 //write one color
     REP_OUTSB(0x03C9, RGB, 3);
 }
-	
+
 
 
 
