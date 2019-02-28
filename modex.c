@@ -373,8 +373,8 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
 
 /*
  * draw_status_bar
- *   DESCRIPTION: create build buffer and change
- *   INPUTS: none
+ *   DESCRIPTION: create status build buffer and change
+ *   INPUTS: text, status build buffer
  *   OUTPUTS: none
  *   RETURN VALUE: none
  *   SIDE EFFECTS: TBD
@@ -637,10 +637,11 @@ void clear_screens() {
 }
 
 /* bitmaskPlayerBlock
-//
-// inputs: get_player_block(pos), get_player_block(-2) 
-//
-//
+// 	DESCRIPTION: produce modified player with background behind sprite
+//  INPUTS: player block, background block, bitmask, result ptr
+//	OUTPUTS: none
+//	RETURN VAL: NONE
+//	SIDE EFFECTS: NONE
 //
 //
 */
@@ -997,6 +998,36 @@ static void set_graphics_registers(unsigned short table[NUM_GRAPHICS_REGS]) {
     REP_OUTSW(0x03CE, table, NUM_GRAPHICS_REGS);
 }
 
+
+
+/*
+ * set_palette_color
+ *   DESCRIPTION: sets palette color
+ *                
+ *   INPUTS: Write address, R, G, B
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: 
+
+*/
+
+//to write to player head writeAddress should be x20
+
+void set_palette_color(unsigned char writeAddress, unsigned char R, unsigned char G, unsigned char B){
+		
+	
+	unsigned char RGB[3] = {R, G, B};
+
+	OUTB(0x03C8, writeAddress);
+
+
+//write one color
+    REP_OUTSB(0x03C9, RGB, 3);
+}
+	
+
+
+
 /*
  * fill_palette
  *   DESCRIPTION: Fill VGA palette with necessary colors for the maze game.
@@ -1148,6 +1179,16 @@ static void copy_image(unsigned char* img, unsigned short scr_addr) {
     );
 }
 
+/*
+ * copy_image_status
+ *   DESCRIPTION: Copy one plane of a screen from the build buffer to the
+ *                video memory. (modified for status function)
+ *   INPUTS: img -- a pointer to a single screen plane in the build buffer
+ *           scr_addr -- the destination offset in video memory
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: copies a plane from the build buffer to video memory
+ */
 static void copy_image_status(unsigned char* img, unsigned short scr_addr) {
     /*
      * memcpy is actually probably good enough here, and is usually
