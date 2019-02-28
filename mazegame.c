@@ -472,7 +472,7 @@ static void *rtc_thread(void *arg) {
     int open[NUM_DIRS];
     int need_redraw = 0;
     int goto_next_level = 0;
-	char playerColorAddress;
+	//char playerColorAddress;
 
     // Loop over levels until a level is lost or quit.
     for (level = 1; (level <= MAX_LEVEL) && (quit_flag == 0); level++) {
@@ -518,7 +518,7 @@ static void *rtc_thread(void *arg) {
 
 		int totalSecs, totalMins;
 		unsigned char playerColorAddress = 32; 	//0x21
-    unsigned char wallColorAddress =  33;     //0x22
+    unsigned char wallColorAddress =  34;     //0x23
 		unsigned char RGBValPlayer, RGBValWall;
 
     while ((quit_flag == 0) && (goto_next_level == 0)) {
@@ -538,10 +538,10 @@ static void *rtc_thread(void *arg) {
 
 			if((totalSecs)%2==0){ //every 2 seconds
 				RGBValPlayer = ((totalSecs)%6)*10;
-				set_palette_color(playerColorAddress, RGBValPlayer , RGBValPlayer, RGBValPlayer);
+				set_palette_color(playerColorAddress, (RGBValPlayer/3) , (RGBValPlayer/2), RGBValPlayer);
 			}
-      
-      RGBValWall= levelNum*10;
+
+      RGBValWall= levelNum*20;
       set_palette_color(wallColorAddress, (RGBValWall)%64, (RGBValWall/2)%64, (RGBValWall/3)%64);
 
 
