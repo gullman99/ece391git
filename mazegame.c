@@ -139,6 +139,17 @@ static unsigned char status_build[STATUS_BUILD_SIZE];
 static void set_status_bar_text(char * status_bar_text, int levelNum, int fruit, int timeMin0, int timeMin1, int timeSec0, int timeSec1);
 static unsigned char bitmaskResult[BLOCK_X_DIM*BLOCK_Y_DIM];
 
+/*
+ * prepare_maze_level
+ *   DESCRIPTION: set the status bar text based on level, number of fruit, time
+ *   INPUTS: level, number of fruit, time sec digit 0, time sec digit 1, time min digit 0, time min digit 1, 
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: none
+ *                 
+ */
+
+
 
 
 void set_status_bar_text(char * status_bar_text, int levelNum, int fruit, int timeMin0, int timeMin1, int timeSec0, int timeSec1){
@@ -461,6 +472,7 @@ static void *rtc_thread(void *arg) {
     int open[NUM_DIRS];
     int need_redraw = 0;
     int goto_next_level = 0;
+	char playerColorAddress;
 
     // Loop over levels until a level is lost or quit.
     for (level = 1; (level <= MAX_LEVEL) && (quit_flag == 0); level++) {
@@ -491,7 +503,7 @@ static void *rtc_thread(void *arg) {
         //draw_full_block(play_x, play_y, get_player_block(last_dir));
 		draw_full_block(play_x, play_y, bitmaskResult);
         show_screen();
-
+//		draw_status_bar(status_bar_text, get_player_mask(list_dir);
         char status_bar_text[40]="    LEVEL -   - FRUITS   TIME: --:--    ";
         int levelNum, fruit, timeMin0, timeMin1, timeSec0, timeSec1;
         levelNum = 0;
@@ -505,8 +517,13 @@ static void *rtc_thread(void *arg) {
         ret = read(fd, &data, sizeof(unsigned long));
 		
 		int totalSecs, totalMins;
+		unsigned char playerColorAddress = 32; 	//0x21
+		unsigned char RGBVal;
 		
         while ((quit_flag == 0) && (goto_next_level == 0)) {
+			
+			//where shit happens!!!!
+			
 			levelNum = level;
 			fruit = get_num_fruit();
 			totalSecs = total/32;
@@ -515,6 +532,14 @@ static void *rtc_thread(void *arg) {
 			timeMin1= (totalMins/10)%10;
 			timeSec0= (totalSecs)%10;
 			timeSec1= (((totalSecs)/10)%60)%6;
+			
+			
+
+			if((totalSecs)%2==0){ //every 2 seconds
+				RGBVal = ((totalSecs)%6)*10;
+				set_palette_color(playerColorAddress, RGBVal , RGBVal, RGBVal);
+			}
+			
 			
 			
             set_status_bar_text(status_bar_text, level, get_num_fruit(), timeMin0, timeMin1, timeSec0, timeSec1);
@@ -626,8 +651,9 @@ static void *rtc_thread(void *arg) {
                 }
             }
             if (need_redraw){
+				draw_status_bar(status_bar_text, status_build);
                 show_screen();
-                draw_status_bar(status_bar_text, status_build);
+				//draw_status_bar(status_bar_text, get_player_mask(list_dir);
             }
             need_redraw = 0;
         }
