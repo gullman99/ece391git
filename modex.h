@@ -145,4 +145,5 @@ extern void set_palette_color(unsigned char writeAddress, unsigned char R, unsig
 extern void fruit_text_RGB_avg();
 
 
+
 #endif /* MODEX_H */

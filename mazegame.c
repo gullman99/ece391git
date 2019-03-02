@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <string.h>
 
 #include "blocks.h"
 #include "maze.h"
@@ -139,18 +140,21 @@ static unsigned char status_build[STATUS_BUILD_SIZE];
 static void set_status_bar_text(char * status_bar_text, int levelNum, int fruit, int timeMin0, int timeMin1, int timeSec0, int timeSec1);
 static unsigned char bitmaskResult[BLOCK_X_DIM*BLOCK_Y_DIM];
 
+static char fruit_string[8][12]={
+  {            }, {"   Apple    "},{"   Grapes   "},{"White peach "},{"Strawberry "},{"   Banana   "},{" Watermelon "},{"    Dew     "}
+};
+
+
+
 /*
- * prepare_maze_level
- *   DESCRIPTION: set the status bar text based on level, number of fruit, time
+ * set_status_bar_text
+  *   DESCRIPTION: set the status bar text based on level, number of fruit, time
  *   INPUTS: level, number of fruit, time sec digit 0, time sec digit 1, time min digit 0, time min digit 1,
  *   OUTPUTS: none
  *   RETURN VALUE: none
- *   SIDE EFFECTS: none
+ *   SIDE EFFECTS: changes status bar display accordingly
  *
  */
-
-
-
 
 void set_status_bar_text(char * status_bar_text, int levelNum, int fruit, int timeMin0, int timeMin1, int timeSec0, int timeSec1){
   //level    fruit    time
@@ -178,6 +182,53 @@ void set_status_bar_text(char * status_bar_text, int levelNum, int fruit, int ti
 
 
 }
+
+/*
+ * set_status_bar_test
+  *   DESCRIPTION: set the status bar text to any string to test
+ *   INPUTS: status_bar_text, testString
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: changes status bar display accordingly
+ *
+ */
+
+void set_status_bar_text_test(char * status_bar_text, char * testString){
+  //level    fruit    time
+  /*#define LEVEL                   10
+  #define FRUIT                   20
+  #define TIMEMIN0                30
+  #define TIMEMIN1                31MIN
+
+  #define TIMESEC0                33
+  #define TIMESEC1                34*/
+  //status_bar_text[]
+  /*char levelChar = '0'+ levelNum;
+  char fruitChar = '0'+ fruit;
+  char timeMin0Char = '0'+ timeMin0;
+  char timeMin1Char = '0'+ timeMin1;
+  char timeSec0Char = '0'+ timeSec0;
+  char timeSec1Char = '0'+ timeSec1;
+
+  status_bar_text[LEVEL] = levelChar;
+  status_bar_text[FRUIT] = fruitChar;
+  status_bar_text[TIMEMIN0] = timeMin0Char;
+  status_bar_text[TIMEMIN1] = timeMin1Char;
+  status_bar_text[TIMESEC0] = timeSec0Char;
+  status_bar_text[TIMESEC1] = timeSec1Char;*/
+  //if(strlen(testString)=< strlen(status_bar_text){
+    int i;
+    for(i=0;i<strlen(status_bar_text);i++){
+      status_bar_text[i]=testString[i];
+    }
+  //}
+
+
+}
+
+
+
+
 
 
 
@@ -550,8 +601,8 @@ static void *rtc_thread(void *arg) {
       set_palette_color(wallColorAddress, (RGBValWall)%64, (RGBValWall/2)%64, (RGBValWall/3)%64);
 
 
-
-        set_status_bar_text(status_bar_text, level, get_num_fruit(), timeMin0, timeMin1, timeSec0, timeSec1);
+        set_status_bar_text_test(status_bar_text, fruit_string[check_for_fruit((play_x / BLOCK_X_DIM),(play_y / BLOCK_Y_DIM))]);
+        //set_status_bar_text(status_bar_text, level, get_num_fruit(), timeMin0, timeMin1, timeSec0, timeSec1);
         //char status_bar_text[40] = "               My  status               ";
 
         draw_status_bar(status_bar_text, status_build, statusColor1, statusColor2);
