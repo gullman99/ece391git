@@ -143,6 +143,7 @@ extern void bitmaskResultBlock(unsigned char* playerBlock, unsigned char* bitmas
 
 extern void set_palette_color(unsigned char writeAddress, unsigned char R, unsigned char G, unsigned char B);
 extern void fruit_text_RGB_avg();
+extern void draw_fruit_text_block(int pos_x, int pos_y, unsigned char* blk);
 
 
 

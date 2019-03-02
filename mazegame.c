@@ -92,6 +92,11 @@
 #define TIMEMIN0                32
 #define TIMESEC1                34
 #define TIMESEC0                35
+
+#define TEXT_WIDTH                8
+#define TEXT_WIDTH_DIM            8/4
+#define TEXT_HEIGHT               16
+
 /*
  * If NDEBUG is not defined, we execute sanity checks to make sure that
  * changes to enumerations, bit maps, etc., have been made consistently.
@@ -145,6 +150,7 @@ static char fruit_string[8][12]={
  "  NO FRUIT  ", "   Apple    ","   Grapes   ","White peach ","Strawberry ","   Banana   "," Watermelon ","    Dew     "
 };
 static char status_bar_text[40]="    LEVEL -   - FRUITS   TIME: --:--    ";
+static unsigned fruit_text_build[TEXT_WIDTH * TEXT_HEIGHT * 12];
 
 
 
@@ -593,8 +599,8 @@ static void *rtc_thread(void *arg) {
 			timeMin1= (totalMins/10)%10;
 			timeSec0= (totalSecs)%10;
 			timeSec1= (((totalSecs)/10)%60)%6;
-      statusColor1 = (level*2)%15;
-      statusColor2 = (level*3)%15;
+			statusColor1 = (level*2)%15;
+			statusColor2 = (level*3)%15;
 
 
 			if((totalSecs)%2==0){ //every 2 seconds
@@ -609,7 +615,13 @@ static void *rtc_thread(void *arg) {
         fruitTypeNum = check_for_fruit((play_x / BLOCK_X_DIM),(play_y / BLOCK_Y_DIM));
         set_status_bar_text_test(status_bar_text, fruit_string[fruitTypeNum]);
         //draw_fruit_text_block(pos_x-5, pos_y_-5, fruit_string[fruitTypeNum])
-        draw_fruit_text_block(pos_x-5, pos_y-5, build+((sizeof(unsigned char)*Image_X_WIDTH*(pos_y-5))+(sizeof(unsigned char)*(pos_x-5))), statusColor1, statusColor2);
+		
+		/*
+		NOTE: TA SAID YOU WERE CONVERTING TO PLANES TWICE, ONCE IN TEXTTOGRAPHICS AND ANOTHER IN DRAW_FRUIT_TEXT_BLOCK
+		DON'T USE DRAW_FRUIT_TEXT_BLOCK INSTEAD JUST DO SOMETHING LIKE BUILD[PLAY_X+PLAY_Y*IMAGE_X_DIM]=FRUIT_TEXT[I]
+		
+		*/
+        draw_fruit_text(fruit_string[fruitTypeNum], fruit_text_build, play_x-5, play_y-5, 1, 5);//, statusColor1, statusColor2);
 
         //set_status_bar_text_test(status_bar_text, fruit_string[3]); //should display White Peach
       }

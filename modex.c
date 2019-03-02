@@ -420,6 +420,8 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
 void draw_status_bar(char * status_bar_text, unsigned char * status_build, int statusColor1, int statusColor2){
 	//text information
   text_to_graphics(status_bar_text, status_build, statusColor1, statusColor2);
+  
+  
   int p_off;
 
   //  target_img = 0;
@@ -456,27 +458,18 @@ void draw_status_bar(char * status_bar_text, unsigned char * status_build, int s
 
 
 /*
- * draw_status_bar
- *   DESCRIPTION: create status build buffer and change
- *   INPUTS: text, status build buffer
+ * draw_fruit_text
+ *   DESCRIPTION:  draws fruit text to screen
+ *   INPUTS: fruitString, fruit_build,pos_x, pos_y, status colors
  *   OUTPUTS: none
  *   RETURN VALUE: none
- *   SIDE EFFECTS: TBD
+ *   SIDE EFFECTS: draws fruit to screen
  */
-void draw_fruit_text(char * status_bar_text, unsigned char * build, int pos_x, int pos_y, int statusColor1, int statusColor2){
-  text_to_graphics(status_bar_text, build, statusColor1, statusColor2);
-  //draw_fruit_text_block(pos_x-5, pos_y-5, build+((sizeof(unsigned char)*Image_X_WIDTH*(pos_y-5))+(sizeof(unsigned char)*(pos_x-5)));
-  show_screen();
+void draw_fruit_text(char * fruitString, unsigned char * fruit_build, int pos_x, int pos_y, int statusColor1, int statusColor2){
+  text_to_graphics(fruitString, fruit_build, statusColor1, statusColor2);
+  draw_fruit_text_block(pos_x-5, pos_y-5, fruit_build);
+  //show_screen();
   }
-
-
-
-
-
-
-
-}
-
 
 
 /*
