@@ -138,11 +138,14 @@ static void *keyboard_thread(void *arg);
 
 static unsigned char status_build[STATUS_BUILD_SIZE];
 static void set_status_bar_text(char * status_bar_text, int levelNum, int fruit, int timeMin0, int timeMin1, int timeSec0, int timeSec1);
+static void set_status_bar_text_test(char * status_bar_text, char * testString);
 static unsigned char bitmaskResult[BLOCK_X_DIM*BLOCK_Y_DIM];
 
 static char fruit_string[8][12]={
-  {            }, {"   Apple    "},{"   Grapes   "},{"White peach "},{"Strawberry "},{"   Banana   "},{" Watermelon "},{"    Dew     "}
+ "  NO FRUIT  ", "   Apple    ","   Grapes   ","White peach ","Strawberry ","   Banana   "," Watermelon ","    Dew     "
 };
+static char status_bar_text[40]="    LEVEL -   - FRUITS   TIME: --:--    ";
+
 
 
 
@@ -218,7 +221,8 @@ void set_status_bar_text_test(char * status_bar_text, char * testString){
   status_bar_text[TIMESEC1] = timeSec1Char;*/
   //if(strlen(testString)=< strlen(status_bar_text){
     int i;
-    for(i=0;i<strlen(status_bar_text);i++){
+    int stringSize =12;
+    for(i=0; i<stringSize; i++){
       status_bar_text[i]=testString[i];
     }
   //}
@@ -518,11 +522,13 @@ static int total = 0;
  */
 static void *rtc_thread(void *arg) {
     int ticks = 0;
-    int level;
+    int level, fruitTypeNum;
     int ret;
     int open[NUM_DIRS];
     int need_redraw = 0;
     int goto_next_level = 0;
+
+
 	//char playerColorAddress;
 
 
@@ -558,7 +564,6 @@ static void *rtc_thread(void *arg) {
 		draw_full_block(play_x, play_y, bitmaskResult);
         show_screen();
 //		draw_status_bar(status_bar_text, get_player_mask(list_dir);
-        char status_bar_text[40]="    LEVEL -   - FRUITS   TIME: --:--    ";
         int levelNum, fruit, timeMin0, timeMin1, timeSec0, timeSec1;
         levelNum = 0;
         fruit = 0;
@@ -600,11 +605,16 @@ static void *rtc_thread(void *arg) {
       RGBValWall= levelNum*20;
       set_palette_color(wallColorAddress, (RGBValWall)%64, (RGBValWall/2)%64, (RGBValWall/3)%64);
 
+      if(check_for_fruit((play_x / BLOCK_X_DIM),(play_y / BLOCK_Y_DIM))!=0){
+        fruitTypeNum = check_for_fruit((play_x / BLOCK_X_DIM),(play_y / BLOCK_Y_DIM));
+        set_status_bar_text_test(status_bar_text, fruit_string[fruitTypeNum]);
+        //draw_fruit_text_block(pos_x-5, pos_y_-5, fruit_string[fruitTypeNum])
+        draw_fruit_text_block(pos_x-5, pos_y-5, build+((sizeof(unsigned char)*Image_X_WIDTH*(pos_y-5))+(sizeof(unsigned char)*(pos_x-5))), statusColor1, statusColor2);
 
-        set_status_bar_text_test(status_bar_text, fruit_string[check_for_fruit((play_x / BLOCK_X_DIM),(play_y / BLOCK_Y_DIM))]);
+        //set_status_bar_text_test(status_bar_text, fruit_string[3]); //should display White Peach
+      }
         //set_status_bar_text(status_bar_text, level, get_num_fruit(), timeMin0, timeMin1, timeSec0, timeSec1);
         //char status_bar_text[40] = "               My  status               ";
-
         draw_status_bar(status_bar_text, status_build, statusColor1, statusColor2);
 
         // get first Periodic Interrupt
