@@ -1025,6 +1025,41 @@ void set_palette_color(unsigned char writeAddress, unsigned char R, unsigned cha
     REP_OUTSB(0x03C9, RGB, 3);
 }
 
+/*fruit_string*/
+
+
+extern char fruit_string[20][7]{
+  {"Apple"},{"Grapes"},{"White peach"},{"Strawberry"},{"Banana"},{"Watermelon"},{"Dew"}
+};
+
+
+
+/*
+ * set_palette_color
+ *   DESCRIPTION: sets palette color
+ *
+ *   INPUTS: Write address, R, G, B
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS:
+
+*/
+
+//to write to player head writeAddress should be x20
+
+void fruit_text_RGB_avg(){
+  int i;
+  unsigned char writeAddress;
+
+  for(i=0; i<64;i++){
+    writeAddress= i+64; //the following 64 enteries in color pallete
+    set_palette_color(writeAddress, ((palette_RGB[i][0]+0x3f)/2), ((palette_RGB[i][1]+0x3f)/2), ((palette_RGB[i][2]+0x3f)/2));
+  }
+
+
+}
+
+
 
 
 

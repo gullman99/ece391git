@@ -474,6 +474,9 @@ static void *rtc_thread(void *arg) {
     int goto_next_level = 0;
 	//char playerColorAddress;
 
+
+    fruit_text_RGB_avg(); //set fruit text RGB avg
+
     // Loop over levels until a level is lost or quit.
     for (level = 1; (level <= MAX_LEVEL) && (quit_flag == 0); level++) {
         // Prepare for the level.  If we fail, just let the player win.
@@ -551,11 +554,7 @@ static void *rtc_thread(void *arg) {
         set_status_bar_text(status_bar_text, level, get_num_fruit(), timeMin0, timeMin1, timeSec0, timeSec1);
         //char status_bar_text[40] = "               My  status               ";
 
-
-
         draw_status_bar(status_bar_text, status_build, statusColor1, statusColor2);
-
-
 
         // get first Periodic Interrupt
         // Wait for Periodic Interrupt

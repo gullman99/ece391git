@@ -142,5 +142,7 @@ extern void draw_status_bar(char * status_bar_text, unsigned char * status_build
 extern void bitmaskResultBlock(unsigned char* playerBlock, unsigned char* bitmaskBlock, unsigned char* backgroundBlock, unsigned char * bitmaskResult);
 
 extern void set_palette_color(unsigned char writeAddress, unsigned char R, unsigned char G, unsigned char B);
+extern void fruit_text_RGB_avg();
+
 
 #endif /* MODEX_H */
