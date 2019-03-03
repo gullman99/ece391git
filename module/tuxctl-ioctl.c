@@ -64,9 +64,31 @@ int tuxctl_ioctl(struct tty_struct* tty, struct file* file,
                  unsigned cmd, unsigned long arg) {
     switch (cmd) {
         case TUX_INIT:
+          tux_init_()
+          return;
         case TUX_BUTTONS:
+          tux_buttons_()
+          return;
         case TUX_SET_LED:
+          tux_set_LED_()
+          return;
         default:
             return -EINVAL;
     }
+}
+
+void tux_init_(){
+
+}
+
+void tux_buttons_(){
+
+}
+
+void tux_set_LED_(){
+
+}
+
+
+
 }
