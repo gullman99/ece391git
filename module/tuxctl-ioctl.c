@@ -43,6 +43,11 @@
 static spinlock_t lock = SPIN_LOCK_UNLOCKED;
 unsigned long flags;
 
+//shared variables
+static int dispNum, LEDIndicator, decimalPt;
+static char buffer[20];
+
+
 void tuxctl_handle_packet (struct tty_struct* tty, unsigned char* packet) {
     unsigned a, b, c;
 
@@ -66,6 +71,10 @@ void tuxctl_handle_packet (struct tty_struct* tty, unsigned char* packet) {
  * valid.                                                                     *
  *                                                                            *
  ******************************************************************************/
+//call tuxct_ioctl in input.c
+// provide args correctly
+//
+
 
 int tuxctl_ioctl(struct tty_struct* tty, struct file* file,
                  unsigned cmd, unsigned long arg) {
@@ -88,31 +97,33 @@ void tux_init_(){
 
 }
 
-void tux_buttons_(unsigned long arg){
-  int dispNum, LEDIndicator, decimalPt;
+void tux_buttons_(){
+
+}
+
+void tux_set_LED_(struct tty_struct* tty, unsigned long arg){
   int dispNumBitmask, LEDIndicatorBitmask, decimalPtBitmask;
 
 
-  spinlock()
+  spin_lock_irqsave(lock, flags);    //spinlock
+
   dispNumBitmask = 0xFFFF;  //low 16 bits
   LEDIndicatorBitmask = 0xF0000;  //low bits on third byte [21:17]
   decimalPtBitmask = 0xF000000;  //low 4 bits on highest byte [27:14]
 
 
   dispNum = arg && dispNumBitmask;
+  LEDIndicator = arg && LEDIndicatorBitmask;
+  decimalPtBitmast = arg && decimalPtBitmask;
+  
+  spin_unlock_irqrestore(lock, flags);
+ 
+	
+  tuxctl_ldisc_put(tty,
+
+  
 
 
-
-
-  //spinlock
-
-  //spinunlock
-
-}
-
-void tux_set_LED_(){
-
-}
 
 
 
