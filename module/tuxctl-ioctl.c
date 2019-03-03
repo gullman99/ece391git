@@ -29,6 +29,7 @@
 
 #define debug(str, ...) printk(KERN_DEBUG "%s: " str, __FUNCTION__, ## __VA_ARGS__)
 
+
 /************************ Protocol Implementation *************************/
 
 /* tuxctl_handle_packet()
@@ -36,6 +37,12 @@
  * tuxctl-ld.c. It calls this function, so all warnings there apply
  * here as well.
  */
+
+
+//spin lock 
+static spinlock_t lock = SPIN_LOCK_UNLOCKED;
+unsigned long flags;
+
 void tuxctl_handle_packet (struct tty_struct* tty, unsigned char* packet) {
     unsigned a, b, c;
 
@@ -85,6 +92,8 @@ void tux_buttons_(unsigned long arg){
   int dispNum, LEDIndicator, decimalPt;
   int dispNumBitmask, LEDIndicatorBitmask, decimalPtBitmask;
 
+
+  spinlock()
   dispNumBitmask = 0xFFFF;  //low 16 bits
   LEDIndicatorBitmask = 0xF0000;  //low bits on third byte [21:17]
   decimalPtBitmask = 0xF000000;  //low 4 bits on highest byte [27:14]
