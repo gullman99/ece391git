@@ -67,7 +67,7 @@ int tuxctl_ioctl(struct tty_struct* tty, struct file* file,
           tux_init_()
           return;
         case TUX_BUTTONS:
-          tux_buttons_()
+          tux_buttons_(arg);
           return;
         case TUX_SET_LED:
           tux_set_LED_()
@@ -81,7 +81,23 @@ void tux_init_(){
 
 }
 
-void tux_buttons_(){
+void tux_buttons_(unsigned long arg){
+  int dispNum, LEDIndicator, decimalPt;
+  int dispNumBitmask, LEDIndicatorBitmask, decimalPtBitmask;
+
+  dispNumBitmask = 0xFFFF;  //low 16 bits
+  LEDIndicatorBitmask = 0xF0000;  //low bits on third byte [21:17]
+  decimalPtBitmask = 0xF000000;  //low 4 bits on highest byte [27:14]
+
+
+  dispNum = arg && dispNumBitmask;
+
+
+
+
+  //spinlock
+
+  //spinunlock
 
 }
 

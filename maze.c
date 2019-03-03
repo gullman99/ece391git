@@ -52,7 +52,7 @@
 
 /* Set to 1 to remove all walls as a debugging aid. (Nate Taylor, S07). */
 //I CHANGED THIS TO TEST SCROLLING!!!! 2/16/19
-#define GOD_MODE 1
+#define GOD_MODE 0
 
 /* local functions--see function headers for details */
 static int mark_maze_area(int x, int y);
