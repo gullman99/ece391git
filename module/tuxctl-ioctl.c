@@ -45,6 +45,7 @@
 //spin lock
 static spinlock_t lock = SPIN_LOCK_UNLOCKED;
 unsigned long flags;
+static int ack;
 
 //shared variables
 //static volatile int dispNum, LEDIndicator, decimalPt;
@@ -80,6 +81,9 @@ char ASCIITOHEX[16] = {0xe7, 0x06, 0xc9, 0x2e, 0xad,0xed, 0x86, 0xef, 0xae, 0xee
 0x6d, 0xe0, 0xe1, 0x4f, 0xa9, 0xa8};
 
 
+
+
+
 void tuxctl_handle_packet (struct tty_struct* tty, unsigned char* packet) {
     unsigned a, b, c;
     char checkBioc, checkReset, bitmaskzeroone;
@@ -106,6 +110,14 @@ void tuxctl_handle_packet (struct tty_struct* tty, unsigned char* packet) {
     tuxctl_ldisc_put(tty, &checkReset, 1);
     //ioctl(fd, MTCP_RESET);  //linux ioctl
   }
+  else if(tuxResponse0 == MTCP_ACK){
+	spin_lock_irqsave(lock, flags);    //spinlock
+	ack= 1;
+	spin_unlock_irqrestore(lock, flags);
+  }
+  ack=0;
+
+  }
     /*printk("packet : %x %x %x\n", a, b, c); */
 }
 
@@ -127,6 +139,16 @@ void tuxctl_handle_packet (struct tty_struct* tty, unsigned char* packet) {
 //
 
 
+/*
+ * tux_init_
+ *   DESCRIPTION: initialize tux controller to the standard settings
+ *   INPUTS: tty struct
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: initializes tux
+ */
+
+
 void tux_init_(struct tty_struct* tty){
 	//char R; //opcode
 	//convert to R4R30R2R1R0
@@ -143,6 +165,15 @@ void tux_init_(struct tty_struct* tty){
 
 }
 
+
+/*
+ * tux_buttons_
+ *   DESCRIPTION: handles the TUX_BUTTONS IOCTL call
+ *   INPUTS: arg that will be modified in function
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: modifies arg
+ */
 unsigned long tux_buttons_(unsigned long arg){
 
 
@@ -229,6 +260,14 @@ unsigned long tux_buttons_(unsigned long arg){
   return arg;
 }
 
+/*
+ * cntBitsSet
+ *   DESCRIPTION: counts the number of bits set
+ *   INPUTS: input
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: counts number of bits set to one
+ */
 char cntBitsSet(char input)
 {
   char numSet;
@@ -240,6 +279,16 @@ char cntBitsSet(char input)
   }
   return numSet;
 }
+
+/*
+ * convertDecToHex
+ *   DESCRIPTION: convert decimal to hex
+ *   INPUTS: n, hex array
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: none
+ */
+
 
 void convertDecToHex(int n, char * hex) {
     int i;
@@ -260,7 +309,22 @@ void convertDecToHex(int n, char * hex) {
       }
 }
 
+/*
+ * tuxSetLED
+ *   DESCRIPTION: sets leds 
+ *   INPUTS: tty, arg
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: changes arg to impliment leds
+ */
+
+
 void tux_set_LED_(struct tty_struct* tty, unsigned long arg){
+   spin_lock_irqsave(lock, flags);    //spinlock
+   if(ack==1){
+	return;
+   }
+  spin_unlock_irqrestore(lock, flags);
   int dispNum, LEDIndicator, decimalPt, dispNumHex;
   int dispNumBitmask, LEDIndicatorBitmask, decimalPtBitmask;
   char buffer;
@@ -268,7 +332,7 @@ void tux_set_LED_(struct tty_struct* tty, unsigned long arg){
   char displayInfoPacket0, displayInfoPacket1, displayInfoPacket2, displayInfoPacket3, displayInfoPacket4;
 
 
-  spin_lock_irqsave(lock, flags);    //spinlock
+  //spin_lock_irqsave(lock, flags);    //spinlock
 
   dispNumBitmask = 0xFFFF;  //low 16 bits
   LEDIndicatorBitmask = 0xF0000;  //low bits on third byte [21:17]
@@ -279,7 +343,7 @@ void tux_set_LED_(struct tty_struct* tty, unsigned long arg){
   LEDIndicator = arg && LEDIndicatorBitmask;
   decimalPt = arg && decimalPtBitmask;
 
-  spin_unlock_irqrestore(lock, flags);
+  //spin_unlock_irqrestore(lock, flags);
 
   //displayInfoPacket0
   /*byte 0 - Bitmask of which LED's to set:*/
@@ -353,7 +417,14 @@ void tux_set_LED_(struct tty_struct* tty, unsigned long arg){
   }
   return;
 }
-
+/*
+ * tuxctl_ioct
+ *   DESCRIPTION: ioctl for tux functionality and commands 
+ *   INPUTS: tty, file, cmd, arg
+ *   OUTPUTS: none
+ *   RETURN VALUE: int
+ *   SIDE EFFECTS: functions like jump table
+ */
 int tuxctl_ioctl(struct tty_struct* tty, struct file* file,
                  unsigned cmd, unsigned long arg) {
     switch (cmd) {
