@@ -47,9 +47,37 @@ static spinlock_t lock = SPIN_LOCK_UNLOCKED;
 unsigned long flags;
 
 //shared variables
-static volatile int dispNum, LEDIndicator, decimalPt;
+//static volatile int dispNum, LEDIndicator, decimalPt;
 static volatile unsigned tuxResponse0, tuxResponse1, tuxResponse2;
 static char buffer[20];
+
+
+
+
+
+/*  Mapping from 7-segment to bits
+*     The 7-segment display is:
+*          _A
+*        F| |B
+*          -Ga
+*        E| |C
+*          -D .dp
+*
+*     The map from bits to segments is:
+*
+*     __7___6___5___4____3___2___1___0__
+*     | A | E | F | dp | G | C | B | D |
+*     +---+---+---+----+---+---+---+---+
+*
+*     Arguments: >= 1 bytes
+*        byte 0 - Bitmask of which LED's to set:
+*
+*        __7___6___5___4____3______2______1______0___
+*         | X | X | X | X | LED3 | LED2 | LED1 | LED0 |
+*         ----+---+---+---+------+------+------+------+
+*/
+char ASCIITOHEX[16] = {0xe7, 0x06, 0xc9, 0x2e, 0xad,0xed, 0x86, 0xef, 0xae, 0xee,
+0x6d, 0xe0, 0xe1, 0x4f, 0xa9, 0xa8};
 
 
 void tuxctl_handle_packet (struct tty_struct* tty, unsigned char* packet) {
@@ -64,19 +92,18 @@ void tuxctl_handle_packet (struct tty_struct* tty, unsigned char* packet) {
 	tuxResponse2 = packet[2];
 
   //handle bioc and reset events
-  bitmaskzeroone =0x01000000
+  //bitmaskzeroone = 0x01000000;
   checkBioc = MTCP_BIOC_EVENT;
-  checkReset =
-
-  checkBioc = checkBioc | bitmaskzeroone;
-  char checkBioc, bitmaskzeroone;
-  checkBioc = MTCP_BIOC_EVENT;
-  bitmaskzeroone =0x01000000
-  checkBioc = checkBioc | bitmaskzeroone;
-  if(tuxResponse0==checkBioc){
+  checkReset = MTCP_RESET;
+  //checkBioc = checkBioc | bitmaskzeroone;
+  //buffer = (char) MTCP_LED_USR;
+  //tuxctl_ldisc_put(tty, &buffer, 1);
+  if(tuxResponse0 == checkBioc){
+    tuxctl_ldisc_put(tty, &checkBioc, 1);
     //ioctl(fd, MTCP_BIOC_EVENT);  //linux ioctl
   }
-  else if(tuxResponse0=checkReset{
+  else if(tuxResponse0 == checkReset){
+    tuxctl_ldisc_put(tty, &checkReset, 1);
     //ioctl(fd, MTCP_RESET);  //linux ioctl
   }
     /*printk("packet : %x %x %x\n", a, b, c); */
@@ -202,8 +229,43 @@ unsigned long tux_buttons_(unsigned long arg){
   return arg;
 }
 
+char cntBitsSet(char input)
+{
+  char numSet;
+  numSet = 0;
+  while (input)
+  {
+    numSet += input & 1;
+    numSet >>= 1;
+  }
+  return numSet;
+}
+
+void convertDecToHex(int n, char * hex) {
+    int i;
+    i = 0;
+    while(n!=0) {
+        int temp;
+        temp  = 0;
+        temp = n % 16;
+        if(temp < 10) {
+            hex[i] = temp + 48;
+            i++;
+        }
+        else{
+            hex[i] = temp + 55;
+            i++;
+        }
+        n = n/16;
+      }
+}
+
 void tux_set_LED_(struct tty_struct* tty, unsigned long arg){
-  /*int dispNumBitmask, LEDIndicatorBitmask, decimalPtBitmask;
+  int dispNum, LEDIndicator, decimalPt, dispNumHex;
+  int dispNumBitmask, LEDIndicatorBitmask, decimalPtBitmask;
+  char buffer;
+  char hex[4];
+  char displayInfoPacket0, displayInfoPacket1, displayInfoPacket2, displayInfoPacket3, displayInfoPacket4;
 
 
   spin_lock_irqsave(lock, flags);    //spinlock
@@ -219,36 +281,77 @@ void tux_set_LED_(struct tty_struct* tty, unsigned long arg){
 
   spin_unlock_irqrestore(lock, flags);
 
-	short displayInfoPacket0, displayInfoPacket1, displayInfoPacket2, displayInfoPacket3;
-*/
- /*  Mapping from 7-segment to bits
- *     The 7-segment display is:
- *          _A
- *        F| |B
- *          -G
- *        E| |C
- *          -D .dp
- *
- *     The map from bits to segments is:
- *
- *     __7___6___5___4____3___2___1___0__
- *     | A | E | F | dp | G | C | B | D |
- *     +---+---+---+----+---+---+---+---+
- *
- *     Arguments: >= 1 bytes
- *        byte 0 - Bitmask of which LED's to set:
- *
- *        __7___6___5___4____3______2______1______0___
- *         | X | X | X | X | LED3 | LED2 | LED1 | LED0 |
- *         ----+---+---+---+------+------+------+------+
-*/
-/*
-  displayInfoPacket0 = LEDIndicator>>16;
-  displayInfoPacket1 = convert hex to alpha numeric using array (for now hardcode 10 values;
+  //displayInfoPacket0
+  /*byte 0 - Bitmask of which LED's to set:*/
 
+  /*        __7___6___5___4____3______2______1______0___
+  *         | X | X | X | X | LED3 | LED2 | LED1 | LED0 |
+  *         ----+---+---+---+------+------+------+------+*/
 
-  tuxctl_ldisc_put(tty, buffer[dispNum,LEDIndicator,decimalPt], <-(the length of this)n)
-*/
+  //number of bits set in byte 0. The bytes should be sent in order of
+  /*    increasing LED number. (e.g LED0, LED2, LED3 for a bitmask of 0x0D)
+  */
+  LEDIndicator =LEDIndicator>>16;
+  //Send x number of packets based on which LEDS are on
+  //5 statements for each option 0-4
+  displayInfoPacket0 = LEDIndicator;
+
+  convertDecToHex(dispNum, hex);
+  buffer = (char) MTCP_LED_SET;
+  tuxctl_ldisc_put(tty, &buffer, 1);
+
+  //output
+  switch(cntBitsSet(LEDIndicator)){
+    case 0:
+      break;
+    case 1:
+      //send LEDIndicator as displayInfoPacket0
+      //displayInfoPacket1=LEDx
+      tuxctl_ldisc_put(tty, &displayInfoPacket0, 1);
+      displayInfoPacket1 =   ASCIITOHEX[hex[0]];
+      tuxctl_ldisc_put(tty, &displayInfoPacket1, 1);
+      break;
+
+    case 2:
+      //send LEDIndicator as displayInfoPacket0
+      //displayInfoPacket1=LEDx
+      //"                 "
+      tuxctl_ldisc_put(tty, &displayInfoPacket0, 1);
+      displayInfoPacket1 =   ASCIITOHEX[hex[0]];
+      tuxctl_ldisc_put(tty, &displayInfoPacket1, 1);
+      displayInfoPacket2 =   ASCIITOHEX[hex[1]];
+      tuxctl_ldisc_put(tty, &displayInfoPacket2, 1);
+      break;
+
+    case 3:
+      //send LEDIndicator as displayInfoPacket0
+      //displayInfoPacket1=LEDx
+      //"                 "
+      tuxctl_ldisc_put(tty, &displayInfoPacket0, 1);
+      displayInfoPacket1 =   ASCIITOHEX[hex[0]];
+      tuxctl_ldisc_put(tty, &displayInfoPacket1, 1);
+      displayInfoPacket2 =   ASCIITOHEX[hex[1]];
+      tuxctl_ldisc_put(tty, &displayInfoPacket2, 1);
+      displayInfoPacket3 =   ASCIITOHEX[hex[2]];
+      tuxctl_ldisc_put(tty, &displayInfoPacket3, 1);
+      break;
+
+    case 4:
+      //send LEDIndicator as displayInfoPacket0
+      //displayInfoPacket1=LEDx
+      //"                 "
+      tuxctl_ldisc_put(tty, &displayInfoPacket0, 1);
+      displayInfoPacket1 =   ASCIITOHEX[hex[0]];
+      tuxctl_ldisc_put(tty, &displayInfoPacket1, 1);
+      displayInfoPacket2 =   ASCIITOHEX[hex[1]];
+      tuxctl_ldisc_put(tty, &displayInfoPacket2, 1);
+      displayInfoPacket3 =   ASCIITOHEX[hex[2]];
+      tuxctl_ldisc_put(tty, &displayInfoPacket3, 1);
+      displayInfoPacket4  =   ASCIITOHEX[hex[3]];
+      tuxctl_ldisc_put(tty, &displayInfoPacket4, 1);
+      break;
+  }
+  return;
 }
 
 int tuxctl_ioctl(struct tty_struct* tty, struct file* file,
@@ -256,14 +359,15 @@ int tuxctl_ioctl(struct tty_struct* tty, struct file* file,
     switch (cmd) {
         case TUX_INIT:
           tux_init_(tty);
-          return;
+          return 0;
         case TUX_BUTTONS:
           tux_buttons_(arg);
-          return;
+          return 0;
         case TUX_SET_LED:
           tux_set_LED_(tty, arg);
-          return;
+          return 0;
         default:
             return -EINVAL;
     }
+    return 0;
 }
