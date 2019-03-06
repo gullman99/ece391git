@@ -6,7 +6,7 @@
  * "Copyright (c) 2004-2009 by Steven S. Lumetta."
  *
  * Permission to use, copy, modify, and distribute this software and its
- * documentation for any purpose, without fee, and without written agreement is
+ * documentation for any purpose, without fee, and  without written agreement is
  * hereby granted, provided that the above copyright notice and the following
  * two paragraphs appear in all copies of this software.
  *
@@ -51,6 +51,8 @@
 #include "assert.h"
 #include "input.h"
 #include "maze.h"
+#include "module/mtcp.h"
+
 
 /* set to 1 and compile this file by itself to test functionality */
 #define TEST_INPUT_DRIVER  1
@@ -212,7 +214,8 @@ void display_time_on_tux(int num_seconds) {
 
 #if (TEST_INPUT_DRIVER == 1)
 int main() {
-    /*cmd_t cmd;
+    int fd;
+    cmd_t cmd;
     dir_t dir = DIR_UP;
     static const char* const cmd_name[NUM_TURNS] = {
         "none", "right", "back", "left"
@@ -222,29 +225,36 @@ int main() {
     };
     */
     /* Grant ourselves permission to use ports 0-1023 */
-    /*if (ioperm(0, 1024, 1) == -1) {
+    if (ioperm(0, 1024, 1) == -1) {
         perror("ioperm");
         return 3;
     }
 
     init_input();
+    fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
+    int ldisc_num = N_MOUSE;
+    ioctl(fd, TIOCSETD, &ldisc_num);
+
     while (1) {
-        printf("CURRENT DIRECTION IS %s\n", dir_names[dir]);
-        while ((cmd = get_command(dir)) == TURN_NONE);
-        if (cmd == CMD_QUIT)
-            break;
-        display_time_on_tux(83);
-        printf ("%s\n", cmd_name[cmd]);
-        dir = (dir + cmd) % 4;
+      printf("CURRENT DIRECTION IS %s\n", dir_names[dir]);
+      cmd = get_command(dir);
+      if (cmd == CMD_QUIT)
+          break;
+      display_time_on_tux(83);
+      printf ("%s\n", cmd_name[cmd]);
+      dir = (dir + cmd) % 4;
+        //int ch;
+        //while ((ch = getc(stdin)) != EOF) {
+
+      }
+
     }
     shutdown_input();
     return 0;
-    */
+
 
     //test
-    fd = open("/dev/ttyS0", O RDWR | O NOCTTY);
-    int ldisc num = N MOUSE;
-    ioctl(fd, TIOCSETD, &ldisc num);
+
 
     ioctl(fd, TUX_INIT);  //linux ioctl
 
@@ -252,9 +262,7 @@ int main() {
     unsigned long buttonPress;
     while(1){
       ioctl(fd, TUX_BUTTONS, &buttonPress);  //linux ioctl
-      printf("%x", buttonPress);
-
-
+      printf("%x", (char)buttonPress);
     }
 
 
